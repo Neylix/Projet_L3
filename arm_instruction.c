@@ -28,8 +28,79 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_constants.h"
 #include "util.h"
 
+int verif_cond(uint32_t value)
+{
+	switch (value)
+	{
+		case 0b0000:
+			return get_bit(value, Z);
+		case 0b0001:
+			return !get_bit(value, Z);
+		case 0b0010:
+			return get_bit(value, C);
+		case 0b0011:
+			return !get_bit(value, C);
+		case 0b0100:
+			return get_bit(value, N);
+		case 0b0101:
+			return !get_bit(value, N);
+		case 0b0110:
+			return get_bit(value, V);
+		case 0b0111:
+			return !get_bit(value, V);
+		case 0b1000:
+			return get_bit(value, C) && !get_bit(value, Z);
+		case 0b1001:
+			return !get_bit(value, C) && get_bit(value, Z);
+		case 0b1010:
+			return get_bit(value, N) == get_bit(value, V);
+		case 0b1011:
+			return get_bit(value, N) != get_bit(value, V);
+		case 0b1100:
+			return !get_bit(value, Z) && (get_bit(value, N) == get_bit(value, V));
+		case 0b1101:
+			return get_bit(value, Z) || (get_bit(value, N) != get_bit(value, V));
+		default:
+			return 1;
+	}
+}
+
 static int arm_execute_instruction(arm_core p) {
-    return 0;
+    uint32_t value;
+    int result;
+    result = arm_fetch(p, &value);
+    if (result)
+	return result;
+    else
+    {
+	if (verif_cond(get_bits(value, 31, 28)))
+	{
+		switch (get_bits(value, 27, 26))
+		{
+			case 0b00:
+				if (get_bit(value, 7) && get_bit(value, 4))
+					result = arm_load_store(p, value);
+				else
+					/* Je ne sais pas ce que signifie arm_data_processing_immediate_msr dans arm_data_processing.h */
+					result = arm_data_processing_shift(p, value);
+				break;
+			case 0b01:		//LDR, LDRB, STR, STRB
+				result = arm_load_store(p, value);
+				break;
+			case 0b10:		//STM, LDM, B/BL
+				if (get_bit(value, 25))
+					result = arm_branch(p, value);
+				else
+					result = arm_load_store_multiple(p, value);
+				break;
+			default:
+				result = UNDEFINED_INSTRUCTION;
+		}
+	}
+	else
+		result = 0;
+    }
+    return result;
 }
 
 int arm_step(arm_core p) {
