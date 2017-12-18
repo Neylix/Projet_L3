@@ -26,7 +26,7 @@ Contact: Guillaume.Huard@imag.fr
 
 struct memory_data {
   int big_endian;
-  uint32_t* address;
+  uint8_t* address;
   size_t size;
 };
 memory memory_create(size_t size, int is_big_endian) {
@@ -49,69 +49,69 @@ void memory_destroy(memory mem) {
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
   if (address<mem->size) {
     *(value) = mem->address[address];
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      *(value) = reverse_2(mem->address[address]);
+      *(value) = reverse_2(((uint16_t *)mem->address)[address]);
     }else {
-      *(value) = mem->address[address];
+      *(value) = ((uint16_t *)mem->address)[address];
     }
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      *(value) = reverse_4(mem->address[address]);
+      *(value) = reverse_4(((uint32_t *)(mem->address))[4*address]);
     }else {
-      *(value) = mem->address[address];
+      *(value) = ((uint32_t *)mem->address)[address];
     }
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
   if (address<mem->size) {
     mem->address[address] = value;
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
 
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      mem->address[address] = reverse_2(value);
+      ((uint16_t *)mem->address)[address] = reverse_2(value);
     }else {
-      mem->address[address] = value;
+      ((uint16_t *)mem->address)[address] = value;
     }
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
 
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      mem->address[address] = reverse_4(value);
+      ((uint32_t *)mem->address)[address] = reverse_4(value);
     }else {
-      mem->address[address] = value;
+      ((uint32_t *)mem->address)[address] = value;
     }
-    return 1;
-  }else {
     return 0;
+  }else {
+    return -1;
   }
 }
