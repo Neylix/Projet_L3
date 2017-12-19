@@ -163,7 +163,10 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 					value = arm_read_register(p, i);
 				result |= arm_write_word(p, adress, value);
 			}
-			adress += 4;
+			if (U)
+				adress += 4;
+			else
+				adress -= 4;
 		}
 	}
 	if (get_bit(ins, 15))
@@ -181,7 +184,10 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 			result |= arm_write_cpsr(p, value & ~(0x1));
 		}
 	}
-	adress += 4;
+	if (U)
+		adress += 4;
+	else
+		adress -= 4;
 	if (W)
 		result |= arm_write_register(p, Rn, adress);
     	return result;
