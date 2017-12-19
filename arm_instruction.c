@@ -96,8 +96,7 @@ static int arm_execute_instruction(arm_core p) {
 			default:
 				result = arm_coprocessor_others_swi(p, value);
 		}
-	}
-	else
+	}else
 		result = 0;
     }
     return result;
