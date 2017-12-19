@@ -27,6 +27,7 @@ Contact: Guillaume.Huard@imag.fr
 #include "debug.h"
 
 int arm_load_store(arm_core p, uint32_t ins) {
+/*
     uint32_t rn;
     uint32_t rm;
     uint32_t value;
@@ -118,11 +119,72 @@ int arm_load_store(arm_core p, uint32_t ins) {
                 return 0;
         break;
     }
+*/
     return UNDEFINED_INSTRUCTION;
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+	uint32_t adress;
+	int P = get_bit(ins, 24);
+	int U = get_bit(ins, 23);
+	int S = get_bit(ins, 22);
+	int W = get_bit(ins, 21);
+	int L = get_bit(ins, 20);
+	int Rn = get_bits(ins, 19, 16);
+	uint32_t value;
+	int result = 0;
+	adress = arm_read_register(p, Rn);
+	if (L && S && get_bit(ins, 15))
+		result |= arm_write_cpsr(p, arm_read_spsr(p));
+	if (P)
+	{
+		if (U)
+			adress += 4;
+		else
+			adress -= 4;
+	}
+	for (int i = 0; i < 15; i++)
+	{
+		if (get_bit(ins, i))
+		{
+			if (L)
+			{
+				result |= arm_read_word(p, adress, &value);
+				if ((S && !L) || (S && L && !get_bit(ins, 15)))
+					result |= arm_write_usr_register(p, i, value);
+				else
+					result |= arm_write_register(p, i, value);
+			}
+			else
+			{
+				if ((S && !L) || (S && L && !get_bit(ins, 15)))
+					value = arm_read_usr_register(p, i);
+				else
+					value = arm_read_register(p, i);
+				result |= arm_write_word(p, adress, value);
+			}
+			adress += 4;
+		}
+	}
+	if (get_bit(ins, 15))
+	{
+		result |= arm_read_word(p, adress, &value);
+		result |= arm_write_register(p, 15, value & 0xFFFFFFFE);
+		if (get_bit(value, 0))
+		{
+			value = arm_read_cpsr(p);
+			result |= arm_write_cpsr(p, value | 0x1);
+		}
+		else
+		{
+			value = arm_read_cpsr(p);
+			result |= arm_write_cpsr(p, value & ~(0x1));
+		}
+	}
+	adress += 4;
+	if (W)
+		result |= arm_write_register(p, Rn, adress);
+    	return result;
 }
 
 int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
