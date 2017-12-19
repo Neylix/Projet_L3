@@ -58,9 +58,9 @@ int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      *(value) = reverse_2(((uint16_t *)mem->address)[address]);
+      *(value) = reverse_2(((uint16_t *)mem->address)[address/2]);
     }else {
-      *(value) = ((uint16_t *)mem->address)[address];
+      *(value) = ((uint16_t *)mem->address)[address/2];
     }
     return 0;
   }else {
@@ -71,9 +71,9 @@ int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      *(value) = reverse_4(((uint32_t *)(mem->address))[4*address]);
+      *(value) = reverse_4(((uint32_t *)(mem->address))[address/4]);
     }else {
-      *(value) = ((uint32_t *)mem->address)[address];
+      *(value) = ((uint32_t *)mem->address)[address/4];
     }
     return 0;
   }else {
@@ -93,9 +93,9 @@ int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      ((uint16_t *)mem->address)[address] = reverse_2(value);
+      ((uint16_t *)mem->address)[address/2] = reverse_2(value);
     }else {
-      ((uint16_t *)mem->address)[address] = value;
+      ((uint16_t *)mem->address)[address/2] = value;
     }
     return 0;
   }else {
@@ -106,9 +106,9 @@ int memory_write_half(memory mem, uint32_t address, uint16_t value) {
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
   if (address<mem->size) {
     if (mem->big_endian) {
-      ((uint32_t *)mem->address)[address] = reverse_4(value);
+      ((uint32_t *)mem->address)[address/4] = reverse_4(value);
     }else {
-      ((uint32_t *)mem->address)[address] = value;
+      ((uint32_t *)mem->address)[address/4] = value;
     }
     return 0;
   }else {
