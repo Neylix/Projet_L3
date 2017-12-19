@@ -94,7 +94,7 @@ static int arm_execute_instruction(arm_core p) {
 					result = arm_load_store_multiple(p, value);
 				break;
 			default:
-				result = UNDEFINED_INSTRUCTION;
+				result = arm_coprocessor_others_swi(p, value);
 		}
 	}
 	else
