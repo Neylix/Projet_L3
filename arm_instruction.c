@@ -34,28 +34,31 @@ static int arm_execute_instruction(arm_core p) {
     result = arm_fetch(p, &value);
     if (result)
 	return result;
-    else
-    {
-		switch (get_bits(value, 27, 26))
-		{
-		case 0b00:
-			if (get_bit(value, 7) && get_bit(value, 4))
+    else{
+		if(verif_cond(value)){
+			switch (get_bits(value, 27, 26))
+			{
+			case 0b00:
+				if (get_bit(value, 7) && get_bit(value, 4))
+					result = arm_load_store(p, value);
+				else
+					/* Je ne sais pas ce que signifie arm_data_processing_immediate_msr dans arm_data_processing.h */
+					result = arm_data_processing_shift(p, value);
+				break;
+			case 0b01:		//LDR, LDRB, STR, STRB
 				result = arm_load_store(p, value);
-			else
-				/* Je ne sais pas ce que signifie arm_data_processing_immediate_msr dans arm_data_processing.h */
-				result = arm_data_processing_shift(p, value);
-			break;
-		case 0b01:		//LDR, LDRB, STR, STRB
-			result = arm_load_store(p, value);
-			break;
-		case 0b10:		//STM, LDM, B/BL
-			if (get_bit(value, 25))
-				result = arm_branch(p, value);
-			else
-				result = arm_load_store_multiple(p, value);
-			break;
-		default:
-			result = arm_coprocessor_others_swi(p, value);
+				break;
+			case 0b10:		//STM, LDM, B/BL
+				if (get_bit(value, 25))
+					result = arm_branch(p, value);
+				else
+					result = arm_load_store_multiple(p, value);
+				break;
+			default:
+				result = arm_coprocessor_others_swi(p, value);
+			}
+		} else {
+			result = 0;
 		}
     return result;
 	}

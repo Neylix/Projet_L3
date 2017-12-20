@@ -25,102 +25,105 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_constants.h"
 #include "util.h"
 #include "debug.h"
+#include <stdio.h>
+
+int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,int H){
+	uint32_t value;
+	uint16_t val_16;
+    uint8_t val_b;
+	if(H){
+		if(arm_read_half(p,address,&val_16) == 0){
+            return arm_write_register(p,noReg,value);
+        } else 
+            return -1;
+	}
+	if(b){ // Word
+        if(arm_read_word(p,address,&value) == 0){
+            return arm_write_register(p,noReg,value);
+        } else 
+            return -1;
+    } else { // Byte
+        if(arm_read_byte(p,address,&val_b) == 0){
+            return arm_write_register(p,noReg,val_b);
+         } else 
+            return -1;
+     }
+}
+
+int store(arm_core p,uint32_t rn, uint32_t rd, uint32_t b, int H){
+	if(H)
+		return arm_write_half(p,rn,rd);
+	if(b){ 
+        return arm_write_word(p,rn,rd);
+    } else {
+        return arm_write_byte(p,rn,(uint8_t)rd);
+    }
+}
 
 int arm_load_store(arm_core p, uint32_t ins) {
-/*
-    uint32_t rn;
-    uint32_t rm;
-    uint32_t value;
-    switch(get_bits(ins,24,20)){ //méthode offset
-        case 0b00001 : //LDR avec U = 0
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_word(p,rn-rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b01001 : //LDR avec U = 1
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_word(p,rn+rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b00101 : //LDRB avec U = 0
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_byte(p,rn-rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b01101 : //LDRB avec U = 1
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_byte(p,rn+rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b????? : //LDRH avec U = 0
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_half(p,rn+rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b????? : //LDRH avec U = 1
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_read_half(p,rn+rm,&value) == 0){
-                arm_write_register(p,get_bits(ins,15,12),value);
-                return 1;
-            } else 
-                return 0;
-        break;
-        case 0b00000 : //STR avec U = 0
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_write_word(p,get_bits(ins,15,12)-rm,rn) == 0)
-                return 1;
-            else 
-                return 0;
-        break;
-        case 0b01000 : //STR avec U = 1
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_write_word(p,get_bits(ins,15,12)+rm,rn) == 0)
-                return 1;
-            else 
-                return 0;
-        break;
-        case 0b00100 : //STRB avec U = 0
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_write_byte(p,get_bits(ins,15,12)-rm,rn) == 0)
-                return 1;
-            else 
-                return 0;
-        break;
-        case 0b01100 : //STRB avec U = 1
-            rn = arm_read_register(p,get_bits(ins,19,16));
-            rm = arm_read_register(p,get_bits(ins,3,0));
-            if(arm_write_byte(p,get_bits(ins,15,12)+rm,rn) == 0)
-                return 1;
-            else 
-                return 0;
-        break;
+	uint32_t address,rd,offset;
+	uint8_t noRegRn = get_bits(ins,19,16);
+	uint8_t noRegRd = get_bits(ins,15,12);
+	uint8_t noRegRm = get_bits(ins,3,0);
+	int P = get_bit(ins, 24);
+	int U = get_bit(ins, 23);
+	int B = get_bit(ins, 22);
+	int W = get_bit(ins, 21);
+	int L = get_bit(ins, 20);
+	int I = get_bit(ins, 25); 
+	int H = get_bit(ins, 5);
+	rd = arm_read_register(p,noRegRd);
+
+    if((P&&W)|| (!P)){ //post-indexed addressing et pre-indexed addressing
+		if(noRegRn == 15)
+			return 0;
+		address = arm_read_register(p,noRegRn);
+		if(I){ //Registre
+			if(noRegRm != 15)
+				offset = arm_read_register(p,noRegRm);
+			else 
+				return 0;
+    	} else { //Immediat
+       		if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
+				offset = (get_bits(ins,11,8) << 4) | noRegRm;
+			} else 
+       			offset = arm_read_register(p,get_bits(ins,11,0));
+    	}
+		if(U) //U = 1
+			address += offset;
+		else // U = 0
+			address -= offset;
+		arm_write_register(p,noRegRn,address);
+		if(L) // Load
+            return load(p,address,noRegRd,B,H);
+		else // Store
+			return store(p,address,rd,B,H);
+	}else{ //offset addressing
+		if(I){ //Registre
+       		address = arm_read_register(p,noRegRn);
+			if(noRegRm != 15)
+        		offset = arm_read_register(p,noRegRm);
+			else 
+				return 0;
+    	} else { //Immediat
+			address = noRegRn;
+			if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
+				offset = (get_bits(ins,11,8) << 4) | noRegRm;
+			} else 
+       			offset = arm_read_register(p,get_bits(ins,11,0));
+    	}
+		if(noRegRn == 15) //Rn est le Registre 15
+        	address += 8;
+		if(U) //U = 1
+			address += offset;
+		else // U = 0
+			address -= offset;
+		if(L) // Load
+            return load(p,address,noRegRd,B,H);
+       	else // Store
+            return store(p,address,rd,B,H);
     }
-*/
-    return UNDEFINED_INSTRUCTION;
+    return UNDEFINED_INSTRUCTION; 
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
