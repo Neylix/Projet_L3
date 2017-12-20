@@ -37,7 +37,7 @@ Makefile.in
 /Examples/example[1234]
 /Examples/insertion_sort
 /registers_test
-
+/Examples/exampleCustom
 
 # Do not track anything in the build/ subdirectory
 # (to be used to do the compilation of the project)

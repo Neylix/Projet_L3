@@ -27,6 +27,14 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include "debug.h"
 
+static uint32_t albit(uint32_t x, uint8_t i, int b)
+{
+	if (b)
+		return set_bit(x, i);
+	else
+		return clr_bit(x, i);
+}
+
 void and(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
 void eor(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
 void sub(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
@@ -241,6 +249,23 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 
 void and(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn & so;
+	arm_write_register(p, rd, res);
+	if (s_bit && rd == 15)
+	{
+		if (arm_current_mode_has_spsr(p))
+			arm_write_cpsr(p, arm_read_spsr(p));
+		else
+			return;
+	}
+	else if (s_bit)
+	{
+		uint32_t cpsr = arm_read_cpsr(p);
+		cpsr = albit(cpsr, N, get_bit(res, 31));
+		cpsr = albit(cpsr, Z, res == 0);
+		cpsr = albit(cpsr, C, shifter_carry_out);
+		arm_write_cpsr(p, cpsr);
+	}
 }
 
 void eor(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
