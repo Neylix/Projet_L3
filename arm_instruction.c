@@ -28,6 +28,43 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_constants.h"
 #include "util.h"
 
+int verif_cond(uint32_t value)
+{
+	switch (value)
+	{
+		case 0b0000:
+			return get_bit(value, Z);
+		case 0b0001:
+			return !get_bit(value, Z);
+		case 0b0010:
+			return get_bit(value, C);
+		case 0b0011:
+			return !get_bit(value, C);
+		case 0b0100:
+			return get_bit(value, N);
+		case 0b0101:
+			return !get_bit(value, N);
+		case 0b0110:
+			return get_bit(value, V);
+		case 0b0111:
+			return !get_bit(value, V);
+		case 0b1000:
+			return get_bit(value, C) && !get_bit(value, Z);
+		case 0b1001:
+			return !get_bit(value, C) && get_bit(value, Z);
+		case 0b1010:
+			return get_bit(value, N) == get_bit(value, V);
+		case 0b1011:
+			return get_bit(value, N) != get_bit(value, V);
+		case 0b1100:
+			return !get_bit(value, Z) && (get_bit(value, N) == get_bit(value, V));
+		case 0b1101:
+			return get_bit(value, Z) || (get_bit(value, N) != get_bit(value, V));
+		default:
+			return 1;
+	}
+}
+
 static int arm_execute_instruction(arm_core p) {
     uint32_t value;
     int result;
@@ -36,34 +73,76 @@ static int arm_execute_instruction(arm_core p) {
 	return result;
     else
     {
-		switch (get_bits(value, 27, 26))
-		{
-		case 0b00:
-			if (get_bit(value, 7) && get_bit(value, 4))
-				result = arm_load_store(p, value);
-			else
-				/* Je ne sais pas ce que signifie arm_data_processing_immediate_msr dans arm_data_processing.h */
-				result = arm_data_processing_shift(p, value);
-			break;
-		case 0b01:		//LDR, LDRB, STR, STRB
-			result = arm_load_store(p, value);
-			break;
-		case 0b10:		//STM, LDM, B/BL
-			if (get_bit(value, 25))
-				result = arm_branch(p, value);
-			else
-				result = arm_load_store_multiple(p, value);
-			break;
-		default:
-			result = arm_coprocessor_others_swi(p, value);
+	if (verif_cond(get_bits(value, 31, 28)))
+	{
+		if(get_bits(value, 31, 28)!=0b1111){
+			switch (get_bits(value, 27,25))
+			{
+				case 0b000:
+				  if(get_bit(value,4)){
+						if (get_bit(value, 7))
+							result = arm_load_store(p, value);
+						else{
+							if(get_bit(value,24)&&(!get_bit(value,23))&&(!get_bit(value,20)))
+								result = arm_miscellaneous(p,value);
+							else
+								result = arm_data_processing_shift(p, value);
+						    }
+						}
+					else{
+						if(get_bit(value,24)&&(!get_bit(value,23))&&(!get_bit(value,20)))
+							result = arm_miscellaneous(p,value);
+						else
+							result = arm_data_processing_immediate_msr(p,value);
+					}
+					break;
+				case 0b001:
+					if(get_bit(value,24)&&(!get_bit(value,23))){
+						if((!get_bit(value,21))&&(!get_bit(value,20)))
+							result = UNDEFINED_INSTRUCTION;
+						else if((get_bit(value,21))&&(!get_bit(value,20)))
+						  result = UNDEFINED_INSTRUCTION; //move immediate to status registers
+						else
+							result = arm_data_processing_immediate_msr(p,value);
+						}
+					else
+						result = arm_data_processing_immediate_msr(p,value);
+					break;
+				case 0b010:
+					result = arm_load_store(p,value);//LD/ST immediate offset
+					break;
+				case 0b011:		//LDR, LDRB, STR, STRB
+					if(get_bit(value,4))
+					  result = UNDEFINED_INSTRUCTION;//Media instructions
+					else
+						result = arm_load_store(p, value);//Ld/St registers offset
+					break;
+				case 0b100:		//STM, LDM
+						result = arm_load_store_multiple(p, value);
+					break;
+				case 0b101:
+					result = arm_branch(p, value);
+					break;
+				case 0b110:
+					result = arm_coprocessor_load_store(p, value);
+					break;
+				case 0b111:
+					result = arm_coprocessor_others_swi(p, value);
+				default:
+					result = UNDEFINED_INSTRUCTION;
+			}
 		}
-    return result;
+		else
+			result = arm_data_processing_shift(p,value);
 	}
+	else
+		result = 0;
+    }
+    return result;
 }
 
 int arm_step(arm_core p) {
     int result;
-
     result = arm_execute_instruction(p);
     if (result)
         arm_exception(p, result);
