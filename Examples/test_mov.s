@@ -1,6 +1,6 @@
 .global main
 .text
 main:
-    mov r0, #0x12
-    mov r1, r2
+    mov r0, #12
+    mov r1, #34
     swi 0x123456
