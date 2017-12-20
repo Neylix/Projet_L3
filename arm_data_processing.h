@@ -28,7 +28,14 @@ Contact: Guillaume.Huard@imag.fr
 int arm_data_processing_shift(arm_core p, uint32_t ins);
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins);
 
-int decode_shifter_operand(arm_core p, uint32_t ins);
+uint32_t decode_shifter_operand(arm_core p, uint32_t ins);
+uint32_t shifter_operand_from_register(arm_core p, uint32_t ins);
+uint32_t shifter_operand_LSL_imm(arm_core p, uint32_t ins);
+uint32_t shifter_operand_LSL_register(arm_core p, uint32_t ins);
+uint32_t shifter_operand_LSR_register(arm_core p, uint32_t ins);
+uint32_t shifter_operand_LSR_imm(arm_core p, uint32_t ins);
+uint32_t shifter_operand_ASR_register(arm_core p, uint32_t ins);
+uint32_t shifter_operand_ASR_imm(arm_core p, uint32_t ins);
 
 int add(arm_core p, uint32_t ins);
 int mov(arm_core p, uint32_t ins);
