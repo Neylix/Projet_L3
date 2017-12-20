@@ -27,6 +27,153 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include "debug.h"
 
+int shifter_carry_out;
+
+uint32_t decode_so(arm_core p, uint32_t ins)
+{
+	uint32_t result;
+	if (get_bit(ins, 25))
+	{
+		result = ror(get_bits(ins, 7, 0), get_bits(ins, 11, 8)*2);
+		if (get_bits(ins, 11, 8) == 0)
+			shifter_carry_out = get_bit(arm_read_cpsr(p), C);
+		else
+			shifter_carry_out = get_bit(result, 31);
+		return result;
+	}
+	if (!get_bit(ins, 4))
+	{
+		uint8_t shift_imm = get_bits(ins, 11, 7);
+		uint8_t shift = get_bits(ins, 6, 5);
+		uint8_t rm = get_bits(ins, 3, 0);
+		uint32_t rm_cont = arm_read_register(p, rm);
+		if (shift == LSL)
+		{
+			if (shift_imm == 0)
+			{
+				shifter_carry_out = get_bit(arm_read_cpsr(p), C);
+				return rm_cont;
+			}
+			shifter_carry_out = get_bit(rm_cont, 32 - shift_imm);
+			return rm_cont << shift_imm;
+		}
+		if (shift == LSR)
+		{
+			if (shift_imm == 0)
+			{
+				shifter_carry_out = get_bit(rm_cont, 31);
+				return 0;
+			}
+			shifter_carry_out = get_bit(rm_cont, shift_imm - 1);
+			return rm_cont >> shift_imm;
+		}
+		if (shift == ASR)
+		{
+			if (shift_imm == 0)
+			{
+				if (get_bit(rm_cont, 31) == 0)
+				{
+					shifter_carry_out = 0;
+					return 0;
+				}
+				shifter_carry_out = 1;
+				return -1;
+			}
+			shifter_carry_out = get_bit(rm_cont, shift_imm - 1);
+			return asr(rm_cont, shift_imm);
+		}
+		if (shift_imm == 0)
+		{
+			shifter_carry_out = get_bit(rm_cont, 0);
+			return (get_bit(arm_read_cpsr(p), C) << 31) | (rm_cont >> 1);
+		}
+		shifter_carry_out = get_bit(rm_cont, shift_imm - 1);
+		return ror(rm_cont, shift_imm);
+	}
+	uint8_t shift_imm = arm_read_register(p, get_bits(ins, 11, 8)) & 0xFF;
+	uint8_t shift = get_bits(ins, 6, 5);
+	uint8_t rm = get_bits(ins, 3, 0);
+	uint32_t rm_cont = arm_read_register(p, rm);
+	if (shift == LSL)
+	{
+		if (shift_imm == 32)
+		{
+			shifter_carry_out = get_bit(rm_cont, 0);
+			return 0;
+		}
+		if (shift_imm > 32)
+		{
+			shifter_carry_out = 0;
+			return 0;
+		}
+		if (shift_imm == 0)
+		{
+			shifter_carry_out = get_bit(arm_read_cpsr(p), C);
+			return rm_cont;
+		}
+		shifter_carry_out = get_bit(rm_cont, 32 - shift_imm);
+		return rm_cont << shift_imm;
+	}
+	if (shift == LSR)
+	{
+		if (shift_imm == 32)
+		{
+			shifter_carry_out = get_bit(rm_cont, 31);
+			return 0;
+		}
+		if (shift_imm > 32)
+		{
+			shifter_carry_out = 0;
+			return 0;
+		}
+		if (shift_imm == 0)
+		{
+			shifter_carry_out = get_bit(rm_cont, 31);
+			return 0;
+		}
+		shifter_carry_out = get_bit(rm_cont, shift_imm - 1);
+		return rm_cont >> shift_imm;
+	}
+	if (shift == ASR)
+	{
+		if (shift_imm >= 32)
+		{
+			if (get_bit(rm_cont, 31) == 0)
+			{
+				shifter_carry_out = get_bit(rm_cont, 31);
+				return 0;
+			}
+			shifter_carry_out = get_bit(rm_cont, 31);
+			return -1;
+		}
+		if (shift_imm == 0)
+		{
+			if (get_bit(rm_cont, 31) == 0)
+			{
+				shifter_carry_out = 0;
+				return 0;
+			}
+			shifter_carry_out = 1;
+			return -1;
+		}
+		shifter_carry_out = get_bit(rm_cont, shift_imm - 1);
+		return asr(rm_cont, shift_imm);
+	}
+	uint8_t shift_imm_5L = shift_imm & 0x1F;
+	if (shift_imm == 0)
+	{
+		shifter_carry_out = get_bit(arm_read_cpsr(p), C);
+		return rm_cont;
+	}
+	if (shift_imm_5L == 0)
+	{
+		shifter_carry_out = get_bit(rm_cont, 31);
+		return rm_cont;
+	}
+	shifter_carry_out = get_bit(rm_cont, shift_imm_5L - 1);
+	return ror(rm_cont, shift_imm_5L);
+}
+
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
