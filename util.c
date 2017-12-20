@@ -68,8 +68,9 @@ uint32_t overflow_from(uint32_t x, uint32_t y, char op) {
       return 0;
     }
   }
-int verif_cond(uint32_t value)
-{
+}
+
+int verif_cond(uint32_t value) {
 	switch (value)
 	{
 		case 0b0000:

@@ -54,27 +54,29 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 }
 
 int decode_shifter_operand(arm_core p, uint32_t ins) {
-  if (get_bit(ins, 25)) { // valeur immédiate avec rotaion
-    int rotate_imm = get_bits(ins, 11, 8);
-    int immed_8 = get_bits(ins, 7, 0);
-    uint32_t shifter_operand = rotate_right(immed_8, rotate_imm*2);
-    // mis a jouer shifter shifter_carry_out
-    if (rotate_imm == 0) {
+  if (verif_cond(ins)) {
+    if (get_bit(ins, 25)) { // valeur immédiate avec rotaion
+      int rotate_imm = get_bits(ins, 11, 8);
+      int immed_8 = get_bits(ins, 7, 0);
+      uint32_t shifter_operand = rotate_right(immed_8, rotate_imm*2);
+      // mis a jouer shifter shifter_carry_out
+      if (rotate_imm == 0) {
+        shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
+      }else {
+        shifter_carry_out = get_bit(shifter_operand, 31);
+      }
+      return shifter_operand;
+    }else if (!get_bit(ins, 25) && (get_bits(ins, 11, 4)==0)) { // valeur immédiate avec shift
+      int register_number=get_bits(ins, 3, 0);
       shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
-    }else {
-      shifter_carry_out = get_bit(shifter_operand, 31);
+      return arm_read_register(p, register_number);
     }
-    return shifter_operand;
-  }else if (!get_bit(ins, 25) && (get_bits(ins, 11, 4)==0)) { // valeur immédiate avec shift
-    int register_number=get_bits(ins, 3, 0);
-    shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
-    return arm_read_register(p, register_number);
+    return UNDEFINED_INSTRUCTION;
   }
   return UNDEFINED_INSTRUCTION;
 }
 
 int mov(arm_core p, uint32_t ins) {
-  printf("entre dans mov \n");
   int operand_value = decode_shifter_operand(p, ins);
   int dest_register = get_bits(ins, 15, 12);
   return arm_write_register(p, dest_register, operand_value);
