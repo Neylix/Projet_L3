@@ -27,6 +27,23 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include "debug.h"
 
+void and(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void eor(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void sub(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void rsb(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void add(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void adc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void sbc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void rsc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void tst(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void teq(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void cmp(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void cmn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void orr(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void mov(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void bic(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+void mvn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit);
+
 int shifter_carry_out;
 
 uint32_t decode_so(arm_core p, uint32_t ins)
@@ -176,9 +193,112 @@ uint32_t decode_so(arm_core p, uint32_t ins)
 
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+	uint32_t rn_cont = arm_read_register(p, get_bits(ins, 19, 16));
+	uint8_t rd = get_bits(ins, 15, 12);
+	uint32_t so = decode_so(p, ins);
+	int s_bit = get_bit(ins, 20);
+	switch (get_bits(ins, 24, 21))
+	{
+		case 0b0000:
+			and(p, rd, rn_cont, so, s_bit);
+		case 0b0001:
+			eor(p, rd, rn_cont, so, s_bit);
+		case 0b0010:
+			sub(p, rd, rn_cont, so, s_bit);
+		case 0b0011:
+			rsb(p, rd, rn_cont, so, s_bit);
+		case 0b0100:
+			add(p, rd, rn_cont, so, s_bit);
+		case 0b0101:
+			adc(p, rd, rn_cont, so, s_bit);
+		case 0b0110:
+			sbc(p, rd, rn_cont, so, s_bit);
+		case 0b0111:
+			rsc(p, rd, rn_cont, so, s_bit);
+		case 0b1000:
+			tst(p, rd, rn_cont, so, s_bit);
+		case 0b1001:
+			teq(p, rd, rn_cont, so, s_bit);
+		case 0b1010:
+			cmp(p, rd, rn_cont, so, s_bit);
+		case 0b1011:
+			cmn(p, rd, rn_cont, so, s_bit);
+		case 0b1100:
+			orr(p, rd, rn_cont, so, s_bit);
+		case 0b1101:
+			mov(p, rd, rn_cont, so, s_bit);
+		case 0b1110:
+			bic(p, rd, rn_cont, so, s_bit);
+		default:
+			mvn(p, rd, rn_cont, so, s_bit);
+	}
+    return 0;
 }
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
+}
+
+void and(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void eor(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void sub(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void rsb(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void add(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void adc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void sbc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void rsc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void tst(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void teq(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void cmp(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void cmn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void orr(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void mov(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void bic(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
+}
+
+void mvn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
+{
 }

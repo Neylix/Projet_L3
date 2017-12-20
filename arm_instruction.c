@@ -85,7 +85,7 @@ static int arm_execute_instruction(arm_core p) {
 					return arm_miscellaneous(p, ins);
 				return arm_data_processing_shift(p, ins);
 			case 0b001:
-				return arm_data_processing_immediate_msr(p, ins);
+				return arm_data_processing_shift(p, ins);
 			case 0b010:
 				return arm_load_store(p, ins);
 			case 0b011:
