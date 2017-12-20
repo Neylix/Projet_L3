@@ -1,117 +1,64 @@
 /*
-Armator - simulateur de jeu d'instruction ARMv5T ï¿½ but pï¿½dagogique
+Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
-termes de la Licence Publique Gï¿½nï¿½rale GNU publiï¿½e par la Free Software
-Foundation (version 2 ou bien toute autre version ultï¿½rieure choisie par vous).
+termes de la Licence Publique Générale GNU publiée par la Free Software
+Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
 
-Ce programme est distribuï¿½ car potentiellement utile, mais SANS AUCUNE
+Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
-commercialisation ou d'adaptation dans un but spï¿½cifique. Reportez-vous ï¿½ la
-Licence Publique Gï¿½nï¿½rale GNU pour plus de dï¿½tails.
+commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
+Licence Publique Générale GNU pour plus de détails.
 
-Vous devez avoir reï¿½u une copie de la Licence Publique Gï¿½nï¿½rale GNU en mï¿½me
-temps que ce programme ; si ce n'est pas le cas, ï¿½crivez ï¿½ la Free Software
+Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
+temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
-ï¿½tats-Unis.
+États-Unis.
 
 Contact: Guillaume.Huard@imag.fr
-	 Bï¿½timent IMAG
+	 Bâtiment IMAG
 	 700 avenue centrale, domaine universitaire
-	 38401 Saint Martin d'Hï¿½res
+	 38401 Saint Martin d'Hères
 */
 #include <stdlib.h>
 #include "memory.h"
 #include "util.h"
 
 struct memory_data {
-  int big_endian;
-  uint8_t* address;
-  size_t size;
 };
+
 memory memory_create(size_t size, int is_big_endian) {
-    memory mem = malloc(sizeof(struct memory_data));
-    mem->big_endian = is_big_endian;
-    mem->size = size;
-    mem->address = malloc(sizeof(uint8_t)*size);
+    memory mem=NULL;
     return mem;
 }
 
 size_t memory_get_size(memory mem) {
-  return mem->size;
+    return 0;
 }
 
 void memory_destroy(memory mem) {
-  free(mem->address);
-  free(mem);
 }
 
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
-  if (address<mem->size) {
-    *(value) = mem->address[address];
-    return 0;
-  }else {
     return -1;
-  }
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
-  if (address<mem->size) {
-    if (mem->big_endian) {
-      *(value) = reverse_2(((uint16_t *)mem->address)[address/2]);
-    }else {
-      *(value) = ((uint16_t *)mem->address)[address/2];
-    }
-    return 0;
-  }else {
     return -1;
-  }
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
-  if (address<mem->size) {
-    if (mem->big_endian) {
-      *(value) = reverse_4(((uint32_t *)(mem->address))[address/4]);
-    }else {
-      *(value) = ((uint32_t *)mem->address)[address/4];
-    }
-    return 0;
-  }else {
     return -1;
-  }
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
-  if (address<mem->size) {
-    mem->address[address] = value;
-    return 0;
-  }else {
     return -1;
-  }
 }
 
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
-  if (address<mem->size) {
-    if (mem->big_endian) {
-      ((uint16_t *)mem->address)[address/2] = reverse_2(value);
-    }else {
-      ((uint16_t *)mem->address)[address/2] = value;
-    }
-    return 0;
-  }else {
     return -1;
-  }
 }
 
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
-  if (address<mem->size) {
-    if (mem->big_endian) {
-      ((uint32_t *)mem->address)[address/4] = reverse_4(value);
-    }else {
-      ((uint32_t *)mem->address)[address/4] = value;
-    }
-    return 0;
-  }else {
     return -1;
-  }
 }
