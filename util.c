@@ -68,4 +68,39 @@ uint32_t overflow_from(uint32_t x, uint32_t y, char op) {
       return 0;
     }
   }
+int verif_cond(uint32_t value)
+{
+	switch (value)
+	{
+		case 0b0000:
+			return get_bit(value, Z);
+		case 0b0001:
+			return !get_bit(value, Z);
+		case 0b0010:
+			return get_bit(value, C);
+		case 0b0011:
+			return !get_bit(value, C);
+		case 0b0100:
+			return get_bit(value, N);
+		case 0b0101:
+			return !get_bit(value, N);
+		case 0b0110:
+			return get_bit(value, V);
+		case 0b0111:
+			return !get_bit(value, V);
+		case 0b1000:
+			return get_bit(value, C) && !get_bit(value, Z);
+		case 0b1001:
+			return !get_bit(value, C) && get_bit(value, Z);
+		case 0b1010:
+			return get_bit(value, N) == get_bit(value, V);
+		case 0b1011:
+			return get_bit(value, N) != get_bit(value, V);
+		case 0b1100:
+			return !get_bit(value, Z) && (get_bit(value, N) == get_bit(value, V));
+		case 0b1101:
+			return get_bit(value, Z) || (get_bit(value, N) != get_bit(value, V));
+		default:
+			return 1;
+	}
 }
