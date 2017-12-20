@@ -67,40 +67,10 @@ int decode_shifter_operand(arm_core p, uint32_t ins) {
     return shifter_operand;
   }else if (!get_bit(ins, 25) && (get_bits(ins, 11, 4)==0)) { // valeur immédiate avec shift
     int register_number=get_bits(ins, 3, 0);
-    shifter_operand = get_bit(arm_read_cpsr(p), 31);
+    shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
     return arm_read_register(p, register_number);
   }
   return UNDEFINED_INSTRUCTION;
-}
-
-void update_flags(arm_core p, char op, uint32_t source_value, uint32_t operand_value, uint32_t operation_result) {
-  uint32_t new_cpsr = arm_read_cpsr(p);
-
-  if (get_bit(operation_result, 31)) {
-    new_cpsr = set_bit(new_cpsr, N);
-  }else {
-    new_cpsr = clr_bit(new_cpsr, N);
-  }
-
-  if (operation_result) {
-    new_cpsr = clr_bit(new_cpsr, Z);
-  }else {
-    new_cpsr = set_bit(new_cpsr, Z);
-  }
-
-  if (carry_from(source_value, operand_value)) {
-    new_cpsr = set_bit(new_cpsr, C);
-  }else {
-    new_cpsr = clr_bit(new_cpsr, C);
-  }
-
-  if (overflow_from(source_value, operand_value, op)) {
-    new_cpsr = set_bit(new_cpsr, V);
-  }else {
-    new_cpsr = clr_bit(new_cpsr, V);
-  }
-
-  arm_write_cpsr(p, new_cpsr);
 }
 
 int mov(arm_core p, uint32_t ins) {
@@ -130,7 +100,33 @@ int add(arm_core p, uint32_t ins) {
       return UNDEFINED_INSTRUCTION;
     }
   }else if (get_bit(ins, 20)) {
-    update_flags(p, ADD, source_value, operand_value, operation_result);
+    uint32_t new_cpsr = arm_read_cpsr(p);
+
+    if (get_bit(operation_result, 31)) {
+      new_cpsr = set_bit(new_cpsr, N);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, N);
+    }
+
+    if (operation_result) {
+      new_cpsr = clr_bit(new_cpsr, Z);
+    }else {
+      new_cpsr = set_bit(new_cpsr, Z);
+    }
+
+    if (carry_from(source_value, operand_value)) {
+      new_cpsr = set_bit(new_cpsr, C);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, C);
+    }
+
+    if (overflow_from(source_value, operand_value, ADD)) {
+      new_cpsr = set_bit(new_cpsr, V);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, V);
+    }
+
+    arm_write_cpsr(p, new_cpsr);
   }
   return 0;
 }
