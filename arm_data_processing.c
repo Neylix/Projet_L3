@@ -74,6 +74,7 @@ int decode_shifter_operand(arm_core p, uint32_t ins) {
 }
 
 int mov(arm_core p, uint32_t ins) {
+  printf("entre dans mov \n");
   int operand_value = decode_shifter_operand(p, ins);
   int dest_register = get_bits(ins, 15, 12);
   return arm_write_register(p, dest_register, operand_value);
