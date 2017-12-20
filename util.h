@@ -43,6 +43,7 @@ Contact: Guillaume.Huard@imag.fr
 uint32_t asr(uint32_t value, uint8_t shift);
 uint32_t ror(uint32_t value, uint8_t rotation);
 uint32_t rotate_right(uint32_t value, uint32_t rotation);
+int verif_cond(uint32_t value);
 
 int is_big_endian();
 #endif
