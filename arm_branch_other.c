@@ -28,7 +28,14 @@ Contact: Guillaume.Huard@imag.fr
 
 
 int arm_branch(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+	uint32_t target_address = get_bits(ins, 23, 0);
+	if (get_bit(target_address, 23))
+		target_address |= 0xFF000000;
+	target_address = target_address << 2;
+	if (get_bit(ins, 24))
+		arm_write_register(p, 14, arm_read_register(p, 15));		//Normalement ce devrait être la bonne valeur, à tester
+	arm_write_register(p, 15, arm_read_register(p, 15) + target_address);
+    return 0;
 }
 
 int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {
@@ -42,5 +49,9 @@ int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {
 }
 
 int arm_miscellaneous(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+	if (get_bit(ins, 22))
+		arm_write_register(p, get_bits(ins, 15, 12), arm_read_spsr(p));
+	else
+		arm_write_register(p, get_bits(ins, 15, 12), arm_read_cpsr(p));
+    return 0;
 }
