@@ -247,83 +247,215 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
 }
 
+void handle_rd15(arm_core p, uint8_t rd, int s_bit)
+{
+	if (s_bit && rd == 15)
+	{
+		if (arm_current_mode_has_spsr(p));
+			arm_write_cpsr(p, arm_read_spsr(p));
+	}
+}
+
+int borrowFrom(uint32_t rn, uint32_t rm)
+{
+	return rn < rm;
+}
+
+int overflowFrom(uint32_t rn, uint32_t rm, int add)	//add est à 1 si addition, 0 si soustraction
+{
+	if (add)
+	{
+		return (get_bit(rn, 31) == get_bit(rm, 31)) && (get_bit(rn - rm, 31) != get_bit(rn, 31));
+	}
+	else
+	{
+		return (get_bit(rn, 31) != get_bit(rm, 31)) && (get_bit(rn, 31) != get_bit(rn - rm, 31));
+	}
+}
+
+int carryFrom(uint32_t rn, uint32_t rm)
+{
+	return rn + rm < rn;
+}
+
+void update_flags1(arm_core p, uint32_t res)
+{
+	uint32_t cpsr = arm_read_cpsr(p);
+	cpsr = albit(cpsr, N, get_bit(res, 31));
+	cpsr = albit(cpsr, Z, res == 0);
+	cpsr = albit(cpsr, C, shifter_carry_out);
+	arm_write_cpsr(p, cpsr);
+}
+
+void update_flags2(arm_core p, uint32_t res, uint32_t rn, uint32_t so)
+{
+	uint32_t cpsr = arm_read_cpsr(p);
+	cpsr = albit(cpsr, N, get_bit(res, 31));
+	cpsr = albit(cpsr, Z, res == 0);
+	cpsr = albit(cpsr, C, !borrowFrom(rn, so));
+	cpsr = albit(cpsr, V, overflowFrom(rn, so, 0));
+	arm_write_cpsr(p, cpsr);
+}
+
+void update_flags3(arm_core p, uint32_t res, uint32_t rn, uint32_t so)
+{
+	uint32_t cpsr = arm_read_cpsr(p);
+	cpsr = albit(cpsr, N, get_bit(res, 31));
+	cpsr = albit(cpsr, Z, res == 0);
+	cpsr = albit(cpsr, C, carryFrom(rn, so));
+	cpsr = albit(cpsr, V, overflowFrom(rn, so, 1));
+	arm_write_cpsr(p, cpsr);
+}
+
 void and(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
 	uint32_t res = rn & so;
 	arm_write_register(p, rd, res);
-	if (s_bit && rd == 15)
-	{
-		if (arm_current_mode_has_spsr(p))
-			arm_write_cpsr(p, arm_read_spsr(p));
-		else
-			return;
-	}
-	else if (s_bit)
-	{
-		uint32_t cpsr = arm_read_cpsr(p);
-		cpsr = albit(cpsr, N, get_bit(res, 31));
-		cpsr = albit(cpsr, Z, res == 0);
-		cpsr = albit(cpsr, C, shifter_carry_out);
-		arm_write_cpsr(p, cpsr);
-	}
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
 
 void eor(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn ^ so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
 
 void sub(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn - so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags2(p, res, rn, so);
 }
 
 void rsb(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = so - rn;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags2(p, res, so, rn);
 }
 
 void add(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn + so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags3(p, res, rn, so);
 }
 
 void adc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn + so + get_bit(arm_read_cpsr(p), C);
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+	{
+		uint32_t cpsr = arm_read_cpsr(p);
+		cpsr = albit(cpsr, N, get_bit(res, 31));
+		cpsr = albit(cpsr, Z, res == 0);
+		cpsr = albit(cpsr, C, carryFrom(rn, so) | carryFrom(rn + so, get_bit(arm_read_cpsr(p), C)));
+		cpsr = albit(cpsr, V, overflowFrom(rn, so, 1) | overflowFrom(rn + so, get_bit(arm_read_cpsr(p), C), 1));
+		arm_write_cpsr(p, cpsr);
+	}
 }
 
 void sbc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn - so - !get_bit(arm_read_cpsr(p), C);
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+	{
+		uint32_t cpsr = arm_read_cpsr(p);
+		cpsr = albit(cpsr, N, get_bit(res, 31));
+		cpsr = albit(cpsr, Z, res == 0);
+		cpsr = albit(cpsr, C, !borrowFrom(rn, so) | !borrowFrom(rn - so, !get_bit(arm_read_cpsr(p), C)));
+		cpsr = albit(cpsr, V, overflowFrom(rn, so, 0) | overflowFrom(rn - so, !get_bit(arm_read_cpsr(p), C), 0));
+		arm_write_cpsr(p, cpsr);
+	}
 }
 
 void rsc(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = so - rn - !get_bit(arm_read_cpsr(p), C);
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+	{
+		uint32_t cpsr = arm_read_cpsr(p);
+		cpsr = albit(cpsr, N, get_bit(res, 31));
+		cpsr = albit(cpsr, Z, res == 0);
+		cpsr = albit(cpsr, C, !borrowFrom(so, rn) | !borrowFrom(so - rn, !get_bit(arm_read_cpsr(p), C)));
+		cpsr = albit(cpsr, V, overflowFrom(so, rn, 0) | overflowFrom(so - rn, !get_bit(arm_read_cpsr(p), C), 0));
+		arm_write_cpsr(p, cpsr);
+	}
 }
 
 void tst(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t alu_out = rn & so;
+	update_flags1(p, alu_out);
 }
 
 void teq(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t alu_out = rn ^ so;
+	update_flags1(p, alu_out);
 }
 
 void cmp(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t alu_out = rn - so;
+	update_flags2(p, alu_out, rn, so);
 }
 
 void cmn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t alu_out = rn + so;
+	update_flags3(p, alu_out, rn, so);
 }
 
 void orr(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn | so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
 
 void mov(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
 
 void bic(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = rn & ~so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
 
 void mvn(arm_core p, uint8_t rd, uint32_t rn, uint32_t so, int s_bit)
 {
+	uint32_t res = ~so;
+	arm_write_register(p, rd, res);
+	handle_rd15(p, rd, s_bit);
+	if (s_bit && rd != 15)
+		update_flags1(p, res);
 }
