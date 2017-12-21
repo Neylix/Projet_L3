@@ -90,8 +90,10 @@ uint32_t decode_shifter_operand(arm_core p, uint32_t ins) {
       shifter_operand = shifter_operand_ASR_imm(p, ins);
     }else if (get_bits(ins, 7, 4)==5) {
       shifter_operand = shifter_operand_ASR_register(p, ins);
-    }else {
-      shifter_operand = UNDEFINED_INSTRUCTION;
+    }else if(get_bits(ins, 6, 4) == 6) { //ROR immediate ou RRX si shift_imm = 0
+      shifter_operand = shifter_operand_ROR_imm(p,ins);
+    } else if(get_bits(ins, 7, 4) == 7){
+      shifter_operand = shifter_operand_ROR_register(p,ins);
     }
     return shifter_operand;
   }
@@ -191,6 +193,42 @@ uint32_t shifter_operand_LSL_register(arm_core p, uint32_t ins) {
     shifter_carry_out = 0;
   }
   return 0;
+}
+
+uint32_t shifter_operand_ROR_imm(arm_core p,uint32_t ins){
+  uint8_t shift_imm = get_bits(ins,11,7);
+  uint8_t RegRm = arm_read_register(p,get_bits(ins,3,0));
+  uint32_t shifter_operand;
+  if(shift_imm == 0)
+    return shifter_operand_RRX(p,ins);
+  else {
+    shifter_operand = ror(RegRm,shift_imm);
+    shifter_carry_out = get_bit(RegRm,shift_imm - 1);
+    return shifter_operand;
+  }
+}
+
+uint32_t shifter_operand_ROR_register(arm_core p,uint32_t ins){
+  uint32_t RegRs = arm_read_register(p,get_bits(ins,11,8));
+  uint32_t RegRm = arm_read_register(p,get_bits(ins,3,0));
+  uint32_t shifter_operand;
+  if(get_bits(RegRs,7,0) == 0){
+    shifter_operand = RegRm;
+    shifter_carry_out = get_bit(arm_read_cpsr(p),C);
+  } else if(get_bits(RegRs,4,0) == 0){
+    shifter_operand = RegRm;
+    shifter_carry_out = get_bit(RegRm,31);
+  } else {
+    shifter_operand = ror(RegRm,get_bits(RegRs,4,0));
+    shifter_carry_out = get_bit(RegRm,get_bits(RegRs,4,0)-1);
+  }
+  return shifter_operand;
+}
+
+uint32_t shifter_operand_RRX(arm_core p,uint32_t ins){
+  uint32_t shifter_operand = (get_bit(arm_read_cpsr(p),C) << 31) | (arm_read_register(p,get_bits(ins,3,0)) >> 1);
+  shifter_carry_out = get_bit(arm_read_register(p,get_bits(ins,3,0)),0);
+  return shifter_operand;
 }
 
 int mov(arm_core p, uint32_t ins) {
