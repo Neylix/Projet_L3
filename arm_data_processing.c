@@ -251,7 +251,7 @@ void handle_rd15(arm_core p, uint8_t rd, int s_bit)
 {
 	if (s_bit && rd == 15)
 	{
-		if (arm_current_mode_has_spsr(p));
+		if (arm_current_mode_has_spsr(p))
 			arm_write_cpsr(p, arm_read_spsr(p));
 	}
 }
