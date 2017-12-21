@@ -57,7 +57,6 @@ uint32_t rotate_right(uint32_t value, uint32_t rotation) {
 }
 
 uint32_t carry_from(uint32_t x, uint32_t y) {
-  printf("entre dans carry from \n");
   if ((x+y)<x || (x+y)<y) {
     return 1;
   }else {
@@ -80,6 +79,14 @@ uint32_t overflow_from(uint32_t x, uint32_t y, char op) {
     }else {
       return 0;
     }
+  }
+}
+
+int borrow_from(uint32_t x, uint32_t y){
+	 if ((x-y)>x || (x-y)>y) {
+    return 1;
+  }else {
+    return 0;
   }
 }
 

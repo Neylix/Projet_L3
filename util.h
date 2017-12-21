@@ -50,6 +50,7 @@ uint32_t lsr(uint32_t value, uint8_t shift_amount);
 uint32_t rrx(uint32_t regRm, uint8_t cflags);
 uint32_t overflow_from(uint32_t x, uint32_t y, char op);
 int verif_cond(uint32_t value);
+int borrow_from(uint32_t x, uint32_t y);
 
 int is_big_endian();
 #endif

@@ -41,7 +41,11 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
         return mov(p, ins);
         break;
       case 0b1010 :
-        return cmp(p,ins);
+        return cmp(p,ins,0);
+        break;
+      case 0b1011 :
+        return cmp(p,ins,1);
+        break;
       default:
         return UNDEFINED_INSTRUCTION;
     }
@@ -272,32 +276,49 @@ int mov(arm_core p, uint32_t ins) {
 
 }
 
-int cmp(arm_core p, uint32_t ins){
+int cmp(arm_core p, uint32_t ins, uint8_t Nflag){ 
   uint32_t regRn = get_bits(ins,19,16);
   uint32_t shift_operand = decode_shifter_operand(p,ins);
-  uint32_t resultat = regRn - shift_operand;
+  uint32_t resultat;
   uint32_t new_cpsr = arm_read_cpsr(p);
-  if (get_bit(resultat, 31)) { //N flag
-    new_cpsr = set_bit(new_cpsr, N);
-  }else {
-    new_cpsr = clr_bit(new_cpsr, N);
-  }
-  if (resultat) { // Z flags
-    new_cpsr = clr_bit(new_cpsr, Z);
-  }else {
-    new_cpsr = set_bit(new_cpsr, Z);
-  }
-  if(carry_from(regRn,shifter_carry_out)){ //C flag
-    new_cpsr = set_bit(new_cpsr, C);
+  char op;
+  if(get_bits(ins,15,12) == 0){
+    if(Nflag){
+      resultat = regRn + shift_operand;
+      op = ADD;
+      if(carry_from(regRn,shifter_carry_out)){ //C flag
+        new_cpsr = set_bit(new_cpsr, C);
+      } else {
+        new_cpsr = clr_bit(new_cpsr, C);
+      }
+    } else {
+      resultat = regRn - shift_operand;
+      op = SUB;
+      if(!borrow_from(regRn,shifter_carry_out)){ //C flag
+        new_cpsr = set_bit(new_cpsr, C);
+      } else {
+        new_cpsr = clr_bit(new_cpsr, C);
+      }
+    }
+    if (get_bit(resultat, 31)) { //N flag
+      new_cpsr = set_bit(new_cpsr, N);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, N);
+    }
+    if (resultat) { // Z flags
+      new_cpsr = clr_bit(new_cpsr, Z);
+    }else {
+      new_cpsr = set_bit(new_cpsr, Z);
+    }
+    if(overflow_from(regRn,shifter_carry_out,op)){ //V flag
+      new_cpsr = set_bit(new_cpsr, V);
+    } else {
+      new_cpsr = clr_bit(new_cpsr, V);
+    }
+    return 0;
   } else {
-    new_cpsr = clr_bit(new_cpsr, C);
+    return -1;
   }
-  if(overflow_from(regRn,shifter_carry_out,SUB)){ //V flag
-    new_cpsr = set_bit(new_cpsr, V);
-  } else {
-    new_cpsr = clr_bit(new_cpsr, V);
-  }
-  return 0;
 }
 
 int add(arm_core p, uint32_t ins) {
