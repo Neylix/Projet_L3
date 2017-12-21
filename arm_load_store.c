@@ -31,7 +31,7 @@ int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,uint8_t H){
 	uint32_t value;
 	uint16_t val_16;
     uint8_t val_b;
-	if(b){ // Word
+	if(!b){ // Word
         if(arm_read_word(p,address,&value) == 0){
             return arm_write_register(p,noReg,value);
         } else 
@@ -50,7 +50,7 @@ int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,uint8_t H){
 }
 
 int store(arm_core p,uint32_t rn, uint32_t rd, uint32_t b, uint8_t H){
-	if(b){ 
+	if(!b){ 
         return arm_write_word(p,rn,rd);
 	} else if(H) {
 		return arm_write_half(p,rn,rd);
@@ -59,70 +59,116 @@ int store(arm_core p,uint32_t rn, uint32_t rd, uint32_t b, uint8_t H){
     }
 }
 
+uint32_t scaled_offset(arm_core p, uint32_t ins, uint32_t offset){
+	switch(get_bits(ins,6,5)){
+		case 0b00 : //LSL
+		if(get_bits(ins,11,7) != 0){
+			offset = lsl(offset,get_bits(ins,11,7));
+		}
+		break;
+		case 0b01 : //LSR
+			if(get_bits(ins,11,7) != 0)
+				offset = lsr(offset,get_bits(ins,11,7));
+			else
+				offset = lsr(offset,32);
+		break;
+		case 0b10 : //ASR
+			if(get_bits(ins,11,7) != 0)
+				offset = asr(offset,get_bits(ins,11,7));
+			else {
+				if(get_bit(offset,31))
+					offset = 0xFFFFFFFF;
+				else 
+					offset = 0;
+			}
+		break;
+		case 0b11 : //ROR ou RRX
+			if(get_bits(ins,11,7) == 0) //RRX
+				offset = rrx(offset,get_bit(arm_read_cpsr(p),C));
+			else //ROR
+				offset = ror(offset, get_bits(ins,11,7));
+		break;			
+	}
+	return offset;
+}
+
+uint32_t set_offset_indexed(arm_core p, uint32_t ins){
+	uint8_t noRegRm = get_bits(ins,3,0);
+	uint8_t I = get_bit(ins, 25); 
+	uint32_t offset;
+	if(I){ //Registre
+		if(noRegRm != 15) {
+			offset = arm_read_register(p,noRegRm);
+			offset = scaled_offset(p,ins,offset);
+		}else 
+			return 0;
+    } else { //Immediat
+       	if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
+			offset = (get_bits(ins,11,8) << 4) | noRegRm;
+		} else { 
+			offset = get_bits(ins,11,0);
+		}
+	}
+	return offset;
+}
+
+uint32_t set_offset_address_offset(arm_core p, uint32_t ins, uint32_t *address){
+	uint32_t offset;
+	uint8_t I = get_bit(ins, 25);
+	uint8_t noRegRn = get_bits(ins,19,16);
+	uint8_t noRegRm = get_bits(ins,3,0);
+	if(I){ //Registre
+       	*address = arm_read_register(p,noRegRn);
+		if(noRegRm != 15){
+        	offset = arm_read_register(p,noRegRm);
+			offset = scaled_offset(p,ins,offset);
+		}else 
+			return 0;
+    } else { //Immediat
+		*address = noRegRn;
+		if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
+			offset = (get_bits(ins,11,8) << 4) | noRegRm;
+		} else 
+       		offset = arm_read_register(p,get_bits(ins,11,0));
+	}
+	if(noRegRn == 15) //Rn est le Registre 15
+        *address += 8;
+	return offset;
+}
+
 int arm_load_store(arm_core p, uint32_t ins) {
 	uint32_t address,rd,offset;
 	uint8_t noRegRn = get_bits(ins,19,16);
 	uint8_t noRegRd = get_bits(ins,15,12);
-	uint8_t noRegRm = get_bits(ins,3,0);
 	uint8_t P = get_bit(ins, 24);
 	uint8_t U = get_bit(ins, 23);
 	uint8_t B = get_bit(ins, 22);
 	uint8_t W = get_bit(ins, 21);
 	uint8_t L = get_bit(ins, 20);
-	uint8_t I = get_bit(ins, 25); 
 	uint8_t H = get_bit(ins, 5);
 	rd = arm_read_register(p,noRegRd);
 
     if((P&&W)|| (!P)){ //post-indexed addressing et pre-indexed addressing
 		if(noRegRn == 15)
 			return 0;
-		address = arm_read_register(p,noRegRn);
-		if(I){ //Registre
-			if(noRegRm != 15)
-				offset = arm_read_register(p,noRegRm);
-			else 
-				return 0;
-    	} else { //Immediat
-       		if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
-				offset = (get_bits(ins,11,8) << 4) | noRegRm;
-			} else 
-       			offset = arm_read_register(p,get_bits(ins,11,0));
-    	}
+		address = arm_read_register(p,noRegRn);	
+		offset = set_offset_indexed(p,ins);
 		if(U) //U = 1
 			address += offset;
 		else // U = 0
 			address -= offset;
 		arm_write_register(p,noRegRn,address);
-		if(L) // Load
-            return load(p,address,noRegRd,B,H);
-		else // Store
-			return store(p,address,rd,B,H);
 	}else{ //offset addressing
-		if(I){ //Registre
-       		address = arm_read_register(p,noRegRn);
-			if(noRegRm != 15)
-        		offset = arm_read_register(p,noRegRm);
-			else 
-				return 0;
-    	} else { //Immediat
-			address = noRegRn;
-			if(get_bit(ins,7) && get_bit(ins,5) && get_bit(ins,4)){
-				offset = (get_bits(ins,11,8) << 4) | noRegRm;
-			} else 
-       			offset = arm_read_register(p,get_bits(ins,11,0));
-    	}
-		if(noRegRn == 15) //Rn est le Registre 15
-        	address += 8;
+		offset = set_offset_address_offset(p,ins,&address);
 		if(U) //U = 1
 			address += offset;
 		else // U = 0
 			address -= offset;
-		if(L) // Load
-            return load(p,address,noRegRd,B,H);
-       	else // Store
-            return store(p,address,rd,B,H);
-    }
-    return UNDEFINED_INSTRUCTION; 
+	}
+	if(L) // Load
+        return load(p,address,noRegRd,B,H);
+	else // Store
+		return store(p,address,rd,B,H); 
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {

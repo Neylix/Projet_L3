@@ -33,6 +33,18 @@ uint32_t ror(uint32_t value, uint8_t rotation) {
     return (value >> rotation) | (value << (32-rotation));
 }
 
+uint32_t lsl(uint32_t value, uint8_t shift_amount){
+	return value << shift_amount;
+}
+
+uint32_t lsr(uint32_t value, uint8_t shift_amount){
+	return value >> shift_amount;
+}
+
+uint32_t rrx(uint32_t regRm, uint8_t cflags){
+	return (cflags << 31) | (regRm >> 1);
+}
+
 int is_big_endian() {
     static uint32_t one = 1;
     return ((* (uint8_t *) &one) == 0);
