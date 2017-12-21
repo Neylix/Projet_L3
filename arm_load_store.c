@@ -27,22 +27,21 @@ Contact: Guillaume.Huard@imag.fr
 #include "debug.h"
 #include <stdio.h>
 
-int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,int H){
+int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,uint8_t H){
 	uint32_t value;
 	uint16_t val_16;
     uint8_t val_b;
-	if(H){
-		if(arm_read_half(p,address,&val_16) == 0){
-            return arm_write_register(p,noReg,value);
-        } else 
-            return -1;
-	}
 	if(b){ // Word
         if(arm_read_word(p,address,&value) == 0){
             return arm_write_register(p,noReg,value);
         } else 
             return -1;
-    } else { // Byte
+    } else if(H){
+		if(arm_read_half(p,address,&val_16) == 0){
+            return arm_write_register(p,noReg,value);
+        } else 
+            return -1;
+	}else { // Byte
         if(arm_read_byte(p,address,&val_b) == 0){
             return arm_write_register(p,noReg,val_b);
          } else 
@@ -50,12 +49,12 @@ int load(arm_core p,uint32_t address, uint32_t noReg, uint32_t b,int H){
      }
 }
 
-int store(arm_core p,uint32_t rn, uint32_t rd, uint32_t b, int H){
-	if(H)
-		return arm_write_half(p,rn,rd);
+int store(arm_core p,uint32_t rn, uint32_t rd, uint32_t b, uint8_t H){
 	if(b){ 
         return arm_write_word(p,rn,rd);
-    } else {
+	} else if(H) {
+		return arm_write_half(p,rn,rd);
+	} else {
         return arm_write_byte(p,rn,(uint8_t)rd);
     }
 }
@@ -65,13 +64,13 @@ int arm_load_store(arm_core p, uint32_t ins) {
 	uint8_t noRegRn = get_bits(ins,19,16);
 	uint8_t noRegRd = get_bits(ins,15,12);
 	uint8_t noRegRm = get_bits(ins,3,0);
-	int P = get_bit(ins, 24);
-	int U = get_bit(ins, 23);
-	int B = get_bit(ins, 22);
-	int W = get_bit(ins, 21);
-	int L = get_bit(ins, 20);
-	int I = get_bit(ins, 25); 
-	int H = get_bit(ins, 5);
+	uint8_t P = get_bit(ins, 24);
+	uint8_t U = get_bit(ins, 23);
+	uint8_t B = get_bit(ins, 22);
+	uint8_t W = get_bit(ins, 21);
+	uint8_t L = get_bit(ins, 20);
+	uint8_t I = get_bit(ins, 25); 
+	uint8_t H = get_bit(ins, 5);
 	rd = arm_read_register(p,noRegRd);
 
     if((P&&W)|| (!P)){ //post-indexed addressing et pre-indexed addressing
