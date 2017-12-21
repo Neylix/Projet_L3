@@ -23,6 +23,7 @@ Contact: Guillaume.Huard@imag.fr
 #ifndef __UTIL_H__
 #define __UTIL_H__
 #include <stdint.h>
+#include <stdio.h>
 
 #define min(x,y) ((x)<(y)?(x):(y))
 #define max(x,y) ((x)>(y)?(x):(y))
@@ -43,6 +44,8 @@ Contact: Guillaume.Huard@imag.fr
 uint32_t asr(uint32_t value, uint8_t shift);
 uint32_t ror(uint32_t value, uint8_t rotation);
 uint32_t rotate_right(uint32_t value, uint32_t rotation);
+uint32_t carry_from(uint32_t x, uint32_t y);
+uint32_t overflow_from(uint32_t x, uint32_t y, char op);
 int verif_cond(uint32_t value);
 
 int is_big_endian();

@@ -21,6 +21,7 @@ Contact: Guillaume.Huard@imag.fr
 	 38401 Saint Martin d'H�res
 */
 #include "util.h"
+#include <math.h>
 #include "arm_constants.h"
 
 /* We implement asr because shifting a signed is non portable in ANSI C */
@@ -43,8 +44,34 @@ uint32_t rotate_right(uint32_t value, uint32_t rotation) {
   return y | z;
 }
 
-int verif_cond(uint32_t value)
-{
+uint32_t carry_from(uint32_t x, uint32_t y) {
+  printf("entre dans carry from \n");
+  if ((x+y)<x || (x+y)<y) {
+    return 1;
+  }else {
+    return 0;
+  }
+}
+
+uint32_t overflow_from(uint32_t x, uint32_t y, char op) {
+  if (op==ADD) {
+    uint32_t res = x+y;
+    if ((get_bit(x, 31) == get_bit(y, 31)) && (get_bit(x, 31) != get_bit(res, 31))) {
+      return 1;
+    }else {
+      return 0;
+    }
+  }else {
+    uint32_t res = x-y;
+    if ((get_bit(x, 31) != get_bit(y, 31)) && (get_bit(x, 31) != get_bit(res, 31))) {
+      return 1;
+    }else {
+      return 0;
+    }
+  }
+}
+
+int verif_cond(uint32_t value) {
 	switch (value)
 	{
 		case 0b0000:
