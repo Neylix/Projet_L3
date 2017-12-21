@@ -40,6 +40,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
       case 0b1101:
         return mov(p, ins);
         break;
+      case 0b1010 :
+        return cmp(p,ins);
       default:
         return UNDEFINED_INSTRUCTION;
     }
@@ -268,6 +270,34 @@ int mov(arm_core p, uint32_t ins) {
   }
   return 0;
 
+}
+
+int cmp(arm_core p, uint32_t ins){
+  uint32_t regRn = get_bits(ins,19,16);
+  uint32_t shift_operand = decode_shifter_operand(p,ins);
+  uint32_t resultat = regRn - shift_operand;
+  uint32_t new_cpsr = arm_read_cpsr(p);
+  if (get_bit(resultat, 31)) { //N flag
+    new_cpsr = set_bit(new_cpsr, N);
+  }else {
+    new_cpsr = clr_bit(new_cpsr, N);
+  }
+  if (resultat) { // Z flags
+    new_cpsr = clr_bit(new_cpsr, Z);
+  }else {
+    new_cpsr = set_bit(new_cpsr, Z);
+  }
+  if(carry_from(regRn,shifter_carry_out)){ //C flag
+    new_cpsr = set_bit(new_cpsr, C);
+  } else {
+    new_cpsr = clr_bit(new_cpsr, C);
+  }
+  if(overflow_from(regRn,shifter_carry_out,SUB)){ //V flag
+    new_cpsr = set_bit(new_cpsr, V);
+  } else {
+    new_cpsr = clr_bit(new_cpsr, V);
+  }
+  return 0;
 }
 
 int add(arm_core p, uint32_t ins) {

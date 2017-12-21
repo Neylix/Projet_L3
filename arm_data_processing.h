@@ -42,5 +42,6 @@ uint32_t shifter_operand_RRX(arm_core p,uint32_t ins);
 
 int add(arm_core p, uint32_t ins);
 int mov(arm_core p, uint32_t ins);
+int cmp(arm_core p, uint32_t ins);
 
 #endif
