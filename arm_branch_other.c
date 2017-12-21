@@ -33,7 +33,7 @@ int arm_branch(arm_core p, uint32_t ins) {
 		target_address |= 0xFF000000;
 	target_address = target_address << 2;
 	if (get_bit(ins, 24))
-		arm_write_register(p, 14, arm_read_register(p, 15));		//Normalement ce devrait être la bonne valeur, à tester
+		arm_write_register(p, 14, arm_read_register(p, 15) - 4);		//-4 à cause du bricolage malvenu de arm_read_register
 	arm_write_register(p, 15, arm_read_register(p, 15) + target_address);
     return 0;
 }

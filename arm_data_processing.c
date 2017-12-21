@@ -209,34 +209,49 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 	{
 		case 0b0000:
 			and(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0001:
 			eor(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0010:
 			sub(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0011:
 			rsb(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0100:
 			add(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0101:
 			adc(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0110:
 			sbc(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b0111:
 			rsc(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1000:
 			tst(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1001:
 			teq(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1010:
 			cmp(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1011:
 			cmn(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1100:
 			orr(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1101:
 			mov(p, rd, rn_cont, so, s_bit);
+			break;
 		case 0b1110:
 			bic(p, rd, rn_cont, so, s_bit);
+			break;
 		default:
 			mvn(p, rd, rn_cont, so, s_bit);
 	}
