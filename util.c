@@ -90,8 +90,7 @@ int borrow_from(uint32_t x, uint32_t y){
   }
 }
 
-int verif_cond(arm_core p, uint32_t value) {
-	uint32_t cpsr = arm_read_cpsr(p);
+int verif_cond(uint32_t cpsr, uint32_t value) {
 	switch (value)
 	{
 		case 0b0000:

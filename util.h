@@ -24,7 +24,6 @@ Contact: Guillaume.Huard@imag.fr
 #define __UTIL_H__
 #include <stdint.h>
 #include <stdio.h>
-#include "arm_core.h"
 
 #define min(x,y) ((x)<(y)?(x):(y))
 #define max(x,y) ((x)>(y)?(x):(y))
@@ -50,7 +49,7 @@ uint32_t carry_from(uint32_t x, uint32_t y);
 uint32_t lsr(uint32_t value, uint8_t shift_amount);
 uint32_t rrx(uint32_t regRm, uint8_t cflags);
 uint32_t overflow_from(uint32_t x, uint32_t y, char op);
-int verif_cond(arm_core p, uint32_t value);
+int verif_cond(uint32_t cpsr, uint32_t value);
 int borrow_from(uint32_t x, uint32_t y);
 
 int is_big_endian();

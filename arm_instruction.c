@@ -35,7 +35,7 @@ static int arm_execute_instruction(arm_core p) {
     if (result)
 	return result;
     else{
-		if(verif_cond(p,value)){
+		if(verif_cond(arm_read_cpsr(p),value)){
 			switch (get_bits(value, 27, 26))
 			{
 			case 0b00:
