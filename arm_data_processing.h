@@ -41,7 +41,8 @@ uint32_t shifter_operand_ROR_register(arm_core p,uint32_t ins);
 uint32_t shifter_operand_RRX(arm_core p,uint32_t ins);
 
 int add(arm_core p, uint32_t ins);
-int mov(arm_core p, uint32_t ins);
-int cmp(arm_core p, uint32_t ins, uint8_t N);
+int mov(arm_core p, uint32_t ins, uint8_t n);
+int cmp(arm_core p, uint32_t ins, uint8_t n);
+int bic(arm_core p, uint32_t ins);
 
 #endif
