@@ -157,7 +157,9 @@ int str(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, 
 			arm_write_register(p, rn, address);
 		}
 	}
-	return result;
+	if (result)
+		return DATA_ABORT;
+	return 0;
 }
 
 int strb(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, int w_bit)
@@ -196,7 +198,9 @@ int strb(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit,
 			arm_write_register(p, rn, address);
 		}
 	}
-	return result;
+	if (result)
+		return DATA_ABORT;
+	return 0;
 }
 
 int ldr(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, int w_bit)
@@ -236,12 +240,12 @@ int ldr(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, 
 		}
 	}
 	if (result)
-		return result;
+		return DATA_ABORT;
 	if (rd == 15)
 		arm_write_register(p, rd, rd_cont & 0xFFFFFFFC);
 	else
 		arm_write_register(p, rd, rd_cont);
-	return result;
+	return 0;
 }
 
 int ldrb(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, int w_bit)
@@ -281,9 +285,9 @@ int ldrb(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit,
 		}
 	}
 	if (result)
-		return result;
+		return DATA_ABORT;
 	arm_write_register(p, rd, (uint32_t)rd_cont);
-	return result;
+	return 0;
 }
 
 int strh(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, int w_bit)
@@ -322,7 +326,9 @@ int strh(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit,
 			arm_write_register(p, rn, address);
 		}
 	}
-	return result;
+	if (result)
+		return DATA_ABORT;
+	return 0;
 }
 
 int ldrh(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit, int w_bit)
@@ -362,15 +368,15 @@ int ldrh(arm_core p, uint8_t rd, uint8_t rn, uint32_t off, int p_bit, int u_bit,
 		}
 	}
 	if (result)
-		return result;
+		return DATA_ABORT;
 	arm_write_register(p, rd, (uint32_t)rd_cont);
-	return result;
+	return 0;
 }
 
 int ldm(arm_core p, uint32_t ins)
 {
 	uint32_t address = arm_read_register(p, get_bits(ins, 19, 16));
-	uint32_t value;
+	uint32_t value = 0;
 	int result = 0;
 	if (get_bit(ins, 23))
 	{
@@ -476,7 +482,9 @@ int ldm(arm_core p, uint32_t ins)
 				arm_write_register(p, get_bits(ins, 19, 16), address - 4);
 		}
 	}
-	return result;
+	if (result)
+		return DATA_ABORT;
+	return 0;
 }
 
 int stm(arm_core p, uint32_t ins)
@@ -559,5 +567,7 @@ int stm(arm_core p, uint32_t ins)
 				arm_write_register(p, get_bits(ins, 19, 16), address - 4);
 		}
 	}
-	return result;
+	if (result)
+		return DATA_ABORT;
+	return 0;
 }

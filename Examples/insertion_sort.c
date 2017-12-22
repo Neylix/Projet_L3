@@ -15,6 +15,7 @@ int main() {
                t[j-1] = t[j];
                t[j] = tmp;
             }
+			j--;
         }
     }
 
