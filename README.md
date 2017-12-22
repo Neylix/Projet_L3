@@ -2,7 +2,7 @@
 
 Instructions implémentées :
 
-ADD 
+ADD
 MOV
 SWI
 B/BL

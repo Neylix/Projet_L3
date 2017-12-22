@@ -344,7 +344,6 @@ int add(arm_core p, uint32_t ins) {
   uint32_t operand_value = decode_shifter_operand(p, ins);
 
   uint32_t operation_result = source_value+operand_value;
-  printf("%u + %u = %u\n", source_value, operand_value, operation_result);
 
   //écriture du résultat dans le registre destination
   int dest_register = get_bits(ins, 15, 12);
