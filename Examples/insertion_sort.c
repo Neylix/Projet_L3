@@ -25,5 +25,6 @@ int main() {
     printf("\n");
 */
 
+	__asm__("swi 0x123456;" : : : );
 	return 0;
 }
