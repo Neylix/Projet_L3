@@ -37,6 +37,7 @@ Makefile.in
 /Examples/example[1234]
 /Examples/insertion_sort
 /Examples/test_mov
+/Examples/example_ldr
 
 
 # Do not track anything in the build/ subdirectory
