@@ -94,33 +94,33 @@ int verif_cond(uint32_t value) {
 	switch (value)
 	{
 		case 0b0000:
-			return get_bit(value, Z);
+			return get_bit(cpsr, Z);
 		case 0b0001:
-			return !get_bit(value, Z);
+			return !get_bit(cpsr, Z);
 		case 0b0010:
-			return get_bit(value, C);
+			return get_bit(cpsr, C);
 		case 0b0011:
-			return !get_bit(value, C);
+			return !get_bit(cpsr, C);
 		case 0b0100:
-			return get_bit(value, N);
+			return get_bit(cpsr, N);
 		case 0b0101:
-			return !get_bit(value, N);
+			return !get_bit(cpsr, N);
 		case 0b0110:
-			return get_bit(value, V);
+			return get_bit(cpsr, V);
 		case 0b0111:
-			return !get_bit(value, V);
+			return !get_bit(cpsr, V);
 		case 0b1000:
-			return get_bit(value, C) && !get_bit(value, Z);
+			return get_bit(cpsr, C) && !get_bit(cpsr, Z);
 		case 0b1001:
-			return !get_bit(value, C) && get_bit(value, Z);
+			return !get_bit(cpsr, C) && get_bit(cpsr, Z);
 		case 0b1010:
-			return get_bit(value, N) == get_bit(value, V);
+			return get_bit(cpsr, N) == get_bit(cpsr, V);
 		case 0b1011:
-			return get_bit(value, N) != get_bit(value, V);
+			return get_bit(cpsr, N) != get_bit(cpsr, V);
 		case 0b1100:
-			return !get_bit(value, Z) && (get_bit(value, N) == get_bit(value, V));
+			return !get_bit(cpsr, Z) && (get_bit(cpsr, N) == get_bit(cpsr, V));
 		case 0b1101:
-			return get_bit(value, Z) || (get_bit(value, N) != get_bit(value, V));
+			return get_bit(cpsr, Z) || (get_bit(cpsr, N) != get_bit(cpsr, V));
 		default:
 			return 1;
 	}

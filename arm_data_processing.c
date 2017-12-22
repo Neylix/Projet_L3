@@ -55,8 +55,6 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
       default:
         return UNDEFINED_INSTRUCTION;
     }
-  }else {
-
   }
   return UNDEFINED_INSTRUCTION;
 }
@@ -66,50 +64,47 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 }
 
 uint32_t decode_shifter_operand(arm_core p, uint32_t ins) {
-  if (verif_cond(ins)) {
-    uint32_t shifter_operand;
-    if (get_bit(ins, 25)) { // valeur immédiate avec rotaion
-      int rotate_imm = get_bits(ins, 11, 8);
-      int immed_8 = get_bits(ins, 7, 0);
-      shifter_operand = rotate_right(immed_8, rotate_imm*2);
-      // mis a jouer shifter shifter_carry_out
-      if (rotate_imm == 0) {
-        shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
-      }else {
-        shifter_carry_out = get_bit(shifter_operand, 31);
-      }
-    }else if (get_bits(ins, 11, 4)==0) { // valeur dans un registre
-      shifter_operand = shifter_operand_from_register(p, ins);
-    }else if (get_bits(ins, 6, 4)==0) { // LSL immediate left shift
-      if(get_bits(ins, 11, 6)==0) { // valeur dans registre
-        shifter_operand = shifter_operand_from_register(p, ins);
-      }else { // shift
-        shifter_operand = shifter_operand_LSL_imm(p, ins);
-      }
-    }else if (get_bits(ins, 7, 4)==1) { // LSL register shift
-      if (get_bits(ins, 7, 0)==0) {
-        shifter_operand = shifter_operand_from_register(p, ins);
-      }else if (get_bits(ins, 7, 0)<32) {
-        shifter_operand = shifter_operand_LSL_imm(p, ins);
-      }else {
-        shifter_operand = shifter_operand_LSL_register(p, ins);
-      }
-    }else if (get_bits(ins, 6, 4)==2) { // LSR immediate shift
-      shifter_operand = shifter_operand_LSR_imm(p, ins);
-    }else if (get_bits(ins, 7, 4)==3) { // LSR register shift
-      shifter_operand = shifter_operand_LSR_register(p, ins);
-    }else if (get_bits(ins, 6, 4)==4) { // ASR immediate
-      shifter_operand = shifter_operand_ASR_imm(p, ins);
-    }else if (get_bits(ins, 7, 4)==5) {
-      shifter_operand = shifter_operand_ASR_register(p, ins);
-    }else if(get_bits(ins, 6, 4) == 6) { //ROR immediate ou RRX si shift_imm = 0
-      shifter_operand = shifter_operand_ROR_imm(p,ins);
-    } else if(get_bits(ins, 7, 4) == 7){
-      shifter_operand = shifter_operand_ROR_register(p,ins);
+  uint32_t shifter_operand;
+  if (get_bit(ins, 25)) { // valeur immédiate avec rotaion
+    int rotate_imm = get_bits(ins, 11, 8);
+    int immed_8 = get_bits(ins, 7, 0);
+    shifter_operand = rotate_right(immed_8, rotate_imm*2);
+    // mis a jouer shifter shifter_carry_out
+    if (rotate_imm == 0) {
+      shifter_carry_out = get_bit(arm_read_cpsr(p), 31);
+    }else {
+      shifter_carry_out = get_bit(shifter_operand, 31);
     }
-    return shifter_operand;
+  }else if (get_bits(ins, 11, 4)==0) { // valeur dans un registre
+    shifter_operand = shifter_operand_from_register(p, ins);
+  }else if (get_bits(ins, 6, 4)==0) { // LSL immediate left shift
+    if(get_bits(ins, 11, 6)==0) { // valeur dans registre
+      shifter_operand = shifter_operand_from_register(p, ins);
+    }else { // shift
+      shifter_operand = shifter_operand_LSL_imm(p, ins);
+    }
+  }else if (get_bits(ins, 7, 4)==1) { // LSL register shift
+    if (get_bits(ins, 7, 0)==0) {
+      shifter_operand = shifter_operand_from_register(p, ins);
+    }else if (get_bits(ins, 7, 0)<32) {
+      shifter_operand = shifter_operand_LSL_imm(p, ins);
+    }else {
+      shifter_operand = shifter_operand_LSL_register(p, ins);
+    }
+  }else if (get_bits(ins, 6, 4)==2) { // LSR immediate shift
+    shifter_operand = shifter_operand_LSR_imm(p, ins);
+  }else if (get_bits(ins, 7, 4)==3) { // LSR register shift
+    shifter_operand = shifter_operand_LSR_register(p, ins);
+  }else if (get_bits(ins, 6, 4)==4) { // ASR immediate
+    shifter_operand = shifter_operand_ASR_imm(p, ins);
+  }else if (get_bits(ins, 7, 4)==5) {
+    shifter_operand = shifter_operand_ASR_register(p, ins);
+  }else if(get_bits(ins, 6, 4) == 6) { //ROR immediate ou RRX si shift_imm = 0
+    shifter_operand = shifter_operand_ROR_imm(p,ins);
+  } else if(get_bits(ins, 7, 4) == 7){
+    shifter_operand = shifter_operand_ROR_register(p,ins);
   }
-  return UNDEFINED_INSTRUCTION;
+  return shifter_operand;
 }
 
 uint32_t shifter_operand_ASR_register(arm_core p, uint32_t ins) {
