@@ -23,6 +23,7 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include <math.h>
 #include "arm_constants.h"
+#include "arm_core.h"
 
 /* We implement asr because shifting a signed is non portable in ANSI C */
 uint32_t asr(uint32_t value, uint8_t shift) {
@@ -90,7 +91,8 @@ int borrow_from(uint32_t x, uint32_t y){
   }
 }
 
-int verif_cond(uint32_t value) {
+int verif_cond(arm_core p, uint32_t value) {
+	uint32_t cpsr = arm_read_cpsr(p);
 	switch (value)
 	{
 		case 0b0000:
