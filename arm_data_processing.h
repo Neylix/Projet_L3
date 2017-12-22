@@ -44,5 +44,8 @@ int add(arm_core p, uint32_t ins);
 int mov(arm_core p, uint32_t ins, uint8_t n);
 int cmp(arm_core p, uint32_t ins, uint8_t n);
 int bic(arm_core p, uint32_t ins);
+int and(arm_core p, uint32_t ins);
+int eor(arm_core p, uint32_t ins);
+int orr(arm_core p, uint32_t ins);
 
 #endif

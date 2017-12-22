@@ -34,6 +34,15 @@ int shifter_carry_out = 0;
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
   if (get_bits(ins, 31, 28) != 0b1111) {
     switch (get_bits(ins, 24, 21)) {
+      case 0b0000:
+        return and(p,ins);
+        break;
+      case 0b0001:
+        return eor(p,ins);
+        break;
+      case 0b1100:
+        return orr(p,ins);
+        break;
       case 0b0100:
         return add(p, ins);
         break;
@@ -399,6 +408,150 @@ int bic(arm_core p, uint32_t ins){
     }
 
     if (arm_read_register(p,get_bits(ins,15,12))) {
+      new_cpsr = clr_bit(new_cpsr, Z);
+    }else {
+      new_cpsr = set_bit(new_cpsr, Z);
+    }
+
+    if (shifter_carry_out) {
+      new_cpsr = set_bit(new_cpsr, C);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, C);
+    }
+
+    arm_write_cpsr(p, new_cpsr);
+  }
+  return 0;
+}
+
+int and(arm_core p, uint32_t ins){
+  int source_register = get_bits(ins, 19, 16); //Rn
+  uint32_t source_value = arm_read_register(p, source_register);
+
+  // récupération de la valeur de l'opérande en fonction de I
+  uint32_t operand_value = decode_shifter_operand(p, ins);
+
+  uint32_t operation_result = source_value & operand_value; //Rd
+
+  //écriture du résultat dans le registre destination
+  int dest_register = get_bits(ins, 15, 12);
+  arm_write_register(p, dest_register, operation_result);
+
+  // mise a jour des flags si nécessaire
+  if (get_bit(ins, 20) && dest_register==15) {
+    if (arm_current_mode_has_spsr(p)) {
+      arm_write_cpsr(p, arm_read_spsr(p));
+    }else {
+      return UNDEFINED_INSTRUCTION;
+    }
+
+
+  }else if (get_bit(ins, 20)) {
+    uint32_t new_cpsr = arm_read_cpsr(p);
+
+    if (get_bit(operation_result, 31)) {
+      new_cpsr = set_bit(new_cpsr, N);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, N);
+    }
+
+    if (operation_result) {
+      new_cpsr = clr_bit(new_cpsr, Z);
+    }else {
+      new_cpsr = set_bit(new_cpsr, Z);
+    }
+
+    if (shifter_carry_out) {
+      new_cpsr = set_bit(new_cpsr, C);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, C);
+    }
+
+    arm_write_cpsr(p, new_cpsr);
+  }
+  return 0;
+}
+
+int eor(arm_core p, uint32_t ins){
+  int source_register = get_bits(ins, 19, 16); //Rn
+  uint32_t source_value = arm_read_register(p, source_register);
+
+  // récupération de la valeur de l'opérande en fonction de I
+  uint32_t operand_value = decode_shifter_operand(p, ins);
+
+  uint32_t operation_result = source_value ^ operand_value; //Rd
+
+  //écriture du résultat dans le registre destination
+  int dest_register = get_bits(ins, 15, 12);
+  arm_write_register(p, dest_register, operation_result);
+
+  // mise a jour des flags si nécessaire
+  if (get_bit(ins, 20) && dest_register==15) {
+    if (arm_current_mode_has_spsr(p)) {
+      arm_write_cpsr(p, arm_read_spsr(p));
+    }else {
+      return UNDEFINED_INSTRUCTION;
+    }
+
+
+  }else if (get_bit(ins, 20)) {
+    uint32_t new_cpsr = arm_read_cpsr(p);
+
+    if (get_bit(operation_result, 31)) {
+      new_cpsr = set_bit(new_cpsr, N);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, N);
+    }
+
+    if (operation_result) {
+      new_cpsr = clr_bit(new_cpsr, Z);
+    }else {
+      new_cpsr = set_bit(new_cpsr, Z);
+    }
+
+    if (shifter_carry_out) {
+      new_cpsr = set_bit(new_cpsr, C);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, C);
+    }
+
+    arm_write_cpsr(p, new_cpsr);
+  }
+  return 0;
+}
+
+int orr(arm_core p, uint32_t ins){
+  int source_register = get_bits(ins, 19, 16); //Rn
+  uint32_t source_value = arm_read_register(p, source_register);
+
+  // récupération de la valeur de l'opérande en fonction de I
+  uint32_t operand_value = decode_shifter_operand(p, ins);
+
+  uint32_t operation_result = source_value | operand_value; //Rd
+
+  //écriture du résultat dans le registre destination
+  int dest_register = get_bits(ins, 15, 12);
+  arm_write_register(p, dest_register, operation_result);
+
+  // mise a jour des flags si nécessaire
+  if (get_bit(ins, 20) && dest_register==15) {
+    if (arm_current_mode_has_spsr(p)) {
+      arm_write_cpsr(p, arm_read_spsr(p));
+    }else {
+      return UNDEFINED_INSTRUCTION;
+    }
+
+
+  }else if (get_bit(ins, 20)) {
+    uint32_t new_cpsr = arm_read_cpsr(p);
+
+    if (get_bit(operation_result, 31)) {
+      new_cpsr = set_bit(new_cpsr, N);
+    }else {
+      new_cpsr = clr_bit(new_cpsr, N);
+    }
+
+    if (operation_result) {
       new_cpsr = clr_bit(new_cpsr, Z);
     }else {
       new_cpsr = set_bit(new_cpsr, Z);

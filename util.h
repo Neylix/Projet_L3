@@ -24,6 +24,7 @@ Contact: Guillaume.Huard@imag.fr
 #define __UTIL_H__
 #include <stdint.h>
 #include <stdio.h>
+#include "arm_core.h"
 
 #define min(x,y) ((x)<(y)?(x):(y))
 #define max(x,y) ((x)>(y)?(x):(y))
