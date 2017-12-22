@@ -40,6 +40,9 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
       case 0b1101:
         return mov(p, ins, 0);
         break;
+      case 0b1111:
+        return mov(p,ins,1); // MVN
+        break;
       case 0b1010 :
         return cmp(p,ins,0);
         break;
@@ -243,9 +246,9 @@ uint32_t shifter_operand_RRX(arm_core p,uint32_t ins){
 int mov(arm_core p, uint32_t ins, uint8_t n) {
   int operand_value = decode_shifter_operand(p, ins);
   int dest_register = get_bits(ins, 15, 12);
-  if(!n){
-    arm_write_register(p, dest_register, operand_value);
-  } else {
+  if(!n){ //MOV
+    arm_write_register(p, dest_register, operand_value); 
+  } else { // MVN
     arm_write_register(p, dest_register, !operand_value);
   }
 
