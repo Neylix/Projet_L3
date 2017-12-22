@@ -251,7 +251,7 @@ int mov(arm_core p, uint32_t ins, uint8_t n) {
   int operand_value = decode_shifter_operand(p, ins);
   int dest_register = get_bits(ins, 15, 12);
   if(!n){ //MOV
-    arm_write_register(p, dest_register, operand_value); 
+    arm_write_register(p, dest_register, operand_value);
   } else { // MVN
     arm_write_register(p, dest_register, !operand_value);
   }
@@ -290,7 +290,7 @@ int mov(arm_core p, uint32_t ins, uint8_t n) {
 
 }
 
-int cmp(arm_core p, uint32_t ins, uint8_t Nflag){ 
+int cmp(arm_core p, uint32_t ins, uint8_t Nflag){
   uint32_t regRn = get_bits(ins,19,16);
   uint32_t shift_operand = decode_shifter_operand(p,ins);
   uint32_t resultat;
