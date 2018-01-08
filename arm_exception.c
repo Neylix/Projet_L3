@@ -35,6 +35,14 @@ void arm_exception(arm_core p, unsigned char exception) {
     /* Semantics of reset interrupt (ARM manual A2-18) */
     if (exception == RESET) {
         arm_write_cpsr(p, 0x1d3 | Exception_bit_9);
-	arm_write_usr_register(p, 15, 0);
+		arm_write_usr_register(p, 15, 0);
     }
+	else if (exception == UNDEFINED_INSTRUCTION)
+	{
+		;		//Ne rien faire, on n'émule pas l'instruction indéfinie
+	}
+	else if (exception == DATA_ABORT)
+	{
+		;		//Ne rien faire, on ne touche pas à la mémoire déjà allouée et on n'en réalloue pas plus
+	}
 }

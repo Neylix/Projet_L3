@@ -15,6 +15,7 @@ int main() {
                t[j-1] = t[j];
                t[j] = tmp;
             }
+			j--;
         }
     }
 
@@ -24,5 +25,6 @@ int main() {
     printf("\n");
 */
 
+	__asm__("swi 0x123456;" : : : );
 	return 0;
 }
