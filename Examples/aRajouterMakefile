@@ -1,0 +1,40 @@
+noinst_PROGRAMS=Example_branch_bge \
+                Example_branch_bgt \
+                Example_branch_bhi \
+                Example_branch_ble \
+                Example_branch_bls \
+                Example_branch_blt \
+                Example_data_adc \
+                Example_data_and \
+                Example_data_bic \
+                Example_data_cmp \
+                Example_data_cmn \
+                Example_data_eor \
+                Example_data_mvn \
+                Example_data_orr \
+                Example_data_rsb \
+                Example_data_rsc \
+                Example_data_sbc \
+                Example_data_sub \
+                Example_data_tst \
+                Example_data_teq \
+
+Example_branch_bge_SOURCES=Example_branch_bge.s
+Example_branch_bgt_SOURCES=Example_branch_bgt.s
+Example_branch_bhi_SOURCES=Example_branch_bhi.s
+Example_branch_ble_SOURCES=Example_branch_ble.s
+Example_branch_bls_SOURCES=Example_branch_bls.s
+Example_branch_blt_SOURCES=Example_branch_blt.s
+Example_data_and_SOURCES=Example_data_and.s
+Example_data_bic_SOURCES=Example_data_bic.s
+Example_data_cmp_SOURCES=Example_data_cmp.s
+Example_data_cmn_SOURCES=Example_data_cmn.s
+Example_data_eor_SOURCES=Example_data_eor.s
+Example_data_mvn_SOURCES=Example_data_mvn.s
+Example_data_orr_SOURCES=Example_data_orr.s
+Example_data_rsb_SOURCES=Example_data_rsb.s
+Example_data_rsc_SOURCES=Example_data_rsc.s
+Example_data_sbc_SOURCES=Example_data_sbc.s
+Example_data_sub_SOURCES=Example_data_sub.s
+Example_data_tst_SOURCES=Example_data_tst.s
+Example_data_teq_SOURCES=Example_data_teq.s
