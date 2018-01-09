@@ -379,91 +379,51 @@ int ldm(arm_core p, uint32_t ins)
 	uint32_t address = arm_read_register(p, get_bits(ins, 19, 16));
 	uint32_t value = 0;
 	int result = 0;
-	if (get_bit(ins, 23))
-	{
-		if (get_bit(ins, 24))
-			address += 4;
-		if (get_bit(ins, 22) && get_bit(ins, 15))
-			arm_write_cpsr(p, arm_read_spsr(p));
-		if (get_bit(ins, 22) && !get_bit(ins, 15))
-		{
-			for (int i = 0; i < 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					result |= arm_read_word(p, address, &value);
-					arm_write_usr_register(p, i, value);
-					address += 4;
-				}
-			}
-			if (get_bit(ins, 15))
-			{
-				result |= arm_read_word(p, address, &value);
-				arm_write_usr_register(p, 15, value & 0xFFFFFFFC);
-				address += 4;
-			}
-
-		}
-		if (!get_bit(ins, 22))
-		{
-			for (int i = 0; i < 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					result |= arm_read_word(p, address, &value);
-					arm_write_register(p, i, value);
-					address += 4;
-				}
-			}
-			if (get_bit(ins, 15))
-			{
-				result |= arm_read_word(p, address, &value);
-				arm_write_register(p, 15, value & 0xFFFFFFFC);
-				address += 4;
-			}
-		}
+	uint32_t decale = 0;
+	if (get_bit(ins, 23)) {
+		decale += 4;
+	} else {
+		decale -= -4;
 	}
-	else
+	if (get_bit(ins, 24))
+		address += decale;
+	if (get_bit(ins, 22) && get_bit(ins, 15))
+		arm_write_cpsr(p, arm_read_spsr(p));
+	if (get_bit(ins, 22) && !get_bit(ins, 15))
 	{
-		if (get_bit(ins, 24))
-			address -= 4;
-		if (get_bit(ins, 22) && get_bit(ins, 15))
-			arm_write_cpsr(p, arm_read_spsr(p));
-		if (get_bit(ins, 22) && !get_bit(ins, 15))
+		for (int i = 0; i < 15; i++)
 		{
-			for (int i = 0; i < 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					result |= arm_read_word(p, address, &value);
-					arm_write_usr_register(p, i, value);
-					address -= 4;
-				}
-			}
-			if (get_bit(ins, 15))
+			if (get_bit(ins, i))
 			{
 				result |= arm_read_word(p, address, &value);
-				arm_write_usr_register(p, 15, value & 0xFFFFFFFC);
-				address -= 4;
+				arm_write_usr_register(p, i, value);
+				address += decale;
 			}
 		}
-		if (!get_bit(ins, 22))
+		if (get_bit(ins, 15))
 		{
-			for (int i = 0; i < 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					result |= arm_read_word(p, address, &value);
-					arm_write_register(p, i, value);
-					address -= 4;
-				}
-			}
-			if (get_bit(ins, 15))
+			result |= arm_read_word(p, address, &value);
+			arm_write_usr_register(p, 15, value & 0xFFFFFFFC);
+			address += decale;
+		}
+
+	}
+	if (!get_bit(ins, 22))
+	{
+		for (int i = 0; i < 15; i++)
+		{
+			if (get_bit(ins, i))
 			{
 				result |= arm_read_word(p, address, &value);
-				arm_write_register(p, 15, value & 0xFFFFFFFC);
-				address -= 4;
+				arm_write_register(p, i, value);
+				address += decale;
 			}
+		}
+		if (get_bit(ins, 15))
+		{
+			result |= arm_read_word(p, address, &value);
+			arm_write_register(p, 15, value & 0xFFFFFFFC);
+			address += decale;
 		}
 	}
 	if (get_bit(ins, 21))
@@ -493,64 +453,40 @@ int stm(arm_core p, uint32_t ins)
 	uint32_t address = arm_read_register(p, get_bits(ins, 19, 16));
 	uint32_t value;
 	int result = 0;
-	if (get_bit(ins, 23))
+	uint32_t decale = 0;
+	if (get_bit(ins, 23)) {
+		decale += 4;
+	}else {
+		decale -= 4;
+	}
+	if (get_bit(ins, 24))
+		address += 4;
+	if (get_bit(ins, 22))
 	{
-		if (get_bit(ins, 24))
-			address += 4;
-		if (get_bit(ins, 22))
+		for (int i = 0; i <= 15; i++)
 		{
-			for (int i = 0; i <= 15; i++)
+			if (get_bit(ins, i))
 			{
-				if (get_bit(ins, i))
-				{
-					value = arm_read_usr_register(p, i);
-					result |= arm_write_word(p, address, value);
-					address += 4;
-				}
-			}
-		}
-		else
-		{
-			for (int i = 0; i <= 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					value = arm_read_register(p, i);
-					result |= arm_write_word(p, address, value);
-					address += 4;
-				}
+				value = arm_read_usr_register(p, i);
+				result |= arm_write_word(p, address, value);
+				address += 4;
 			}
 		}
 	}
 	else
 	{
-		if (get_bit(ins, 24))
-			address -= 4;
-		if (get_bit(ins, 22))
+		for (int i = 0; i <= 15; i++)
 		{
-			for (int i = 0; i <= 15; i++)
+			if (get_bit(ins, i))
 			{
-				if (get_bit(ins, i))
-				{
-					value = arm_read_usr_register(p, i);
-					result |= arm_write_word(p, address, value);
-					address -= 4;
-				}
-			}
-		}
-		else
-		{
-			for (int i = 0; i <= 15; i++)
-			{
-				if (get_bit(ins, i))
-				{
-					value = arm_read_register(p, i);
-					result |= arm_write_word(p, address, value);
-					address -= 4;
-				}
+				value = arm_read_register(p, i);
+				result |= arm_write_word(p, address, value);
+				address += 4;
 			}
 		}
 	}
+
+
 	if (get_bit(ins, 21))
 	{
 		switch (get_bits(ins, 24, 23))
