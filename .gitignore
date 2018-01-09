@@ -36,8 +36,14 @@ Makefile.in
 /send_irq
 /Examples/example[1234]
 /Examples/insertion_sort
+<<<<<<< HEAD
+/Examples/test_mov
+/Examples/example_ldr
+
+=======
 /registers_test
 /Examples/exampleCustom
+>>>>>>> nils00
 
 # Do not track anything in the build/ subdirectory
 # (to be used to do the compilation of the project)
