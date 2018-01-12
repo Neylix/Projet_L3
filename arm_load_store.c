@@ -383,7 +383,7 @@ int ldm(arm_core p, uint32_t ins)
 	if (get_bit(ins, 23)) {
 		decale += 4;
 	} else {
-		decale -= -4;
+		decale -= 4;
 	}
 	if (get_bit(ins, 24))
 		address += decale;
@@ -460,7 +460,7 @@ int stm(arm_core p, uint32_t ins)
 		decale -= 4;
 	}
 	if (get_bit(ins, 24))
-		address += 4;
+		address += decale;
 	if (get_bit(ins, 22))
 	{
 		for (int i = 0; i <= 15; i++)
@@ -469,7 +469,7 @@ int stm(arm_core p, uint32_t ins)
 			{
 				value = arm_read_usr_register(p, i);
 				result |= arm_write_word(p, address, value);
-				address += 4;
+				address += decale;
 			}
 		}
 	}
@@ -481,7 +481,7 @@ int stm(arm_core p, uint32_t ins)
 			{
 				value = arm_read_register(p, i);
 				result |= arm_write_word(p, address, value);
-				address += 4;
+				address += decale;
 			}
 		}
 	}
