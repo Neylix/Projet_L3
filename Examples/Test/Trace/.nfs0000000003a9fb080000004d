@@ -1,0 +1,435 @@
+GNU gdb (7.10-1ubuntu3+9) 7.10
+Copyright (C) 2015 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=x86_64-linux-gnu --target=arm-none-eabi".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from example1...done.
+Connected to the simulator.
+Loading section .text, size 0x18 vma 0x20
+Start address 0x28
+Transfer rate: 192 bits in <1 sec.
+Breakpoint 1 at 0x28: file example1.s, line 8.
+
+Breakpoint 1, main () at example1.s:8
+8	    mov r0, #5
+=====DEPART=====
+loop () at example1.s:10
+10	    bl decr
+r0             0x5	5
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x0	0
+pc             0x2c	0x2c <loop>
+cpsr           0xd3	211
+========================
+decr () at example1.s:4
+4	    subs r0, r0, #1
+r0             0x5	5
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x20	0x20 <decr>
+cpsr           0xd3	211
+========================
+5	    mov pc, lr
+r0             0x4	4
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x24	0x24 <decr+4>
+cpsr           0x200000d3	536871123
+========================
+loop () at example1.s:11
+11	    bne loop
+r0             0x4	4
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x30	0x30 <loop+4>
+cpsr           0x200000d3	536871123
+========================
+10	    bl decr
+r0             0x4	4
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x2c	0x2c <loop>
+cpsr           0x200000d3	536871123
+========================
+decr () at example1.s:4
+4	    subs r0, r0, #1
+r0             0x4	4
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x20	0x20 <decr>
+cpsr           0x200000d3	536871123
+========================
+5	    mov pc, lr
+r0             0x3	3
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x24	0x24 <decr+4>
+cpsr           0x200000d3	536871123
+========================
+loop () at example1.s:11
+11	    bne loop
+r0             0x3	3
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x30	0x30 <loop+4>
+cpsr           0x200000d3	536871123
+========================
+10	    bl decr
+r0             0x3	3
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x2c	0x2c <loop>
+cpsr           0x200000d3	536871123
+========================
+decr () at example1.s:4
+4	    subs r0, r0, #1
+r0             0x3	3
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x20	0x20 <decr>
+cpsr           0x200000d3	536871123
+========================
+5	    mov pc, lr
+r0             0x2	2
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x24	0x24 <decr+4>
+cpsr           0x200000d3	536871123
+========================
+loop () at example1.s:11
+11	    bne loop
+r0             0x2	2
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x30	0x30 <loop+4>
+cpsr           0x200000d3	536871123
+========================
+10	    bl decr
+r0             0x2	2
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x2c	0x2c <loop>
+cpsr           0x200000d3	536871123
+========================
+decr () at example1.s:4
+4	    subs r0, r0, #1
+r0             0x2	2
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x20	0x20 <decr>
+cpsr           0x200000d3	536871123
+========================
+5	    mov pc, lr
+r0             0x1	1
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x24	0x24 <decr+4>
+cpsr           0x200000d3	536871123
+========================
+loop () at example1.s:11
+11	    bne loop
+r0             0x1	1
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x30	0x30 <loop+4>
+cpsr           0x200000d3	536871123
+========================
+10	    bl decr
+r0             0x1	1
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x2c	0x2c <loop>
+cpsr           0x200000d3	536871123
+========================
+decr () at example1.s:4
+4	    subs r0, r0, #1
+r0             0x1	1
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x20	0x20 <decr>
+cpsr           0x200000d3	536871123
+========================
+5	    mov pc, lr
+r0             0x0	0
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x24	0x24 <decr+4>
+cpsr           0x600000d3	1610612947
+========================
+loop () at example1.s:11
+11	    bne loop
+r0             0x0	0
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x30	0x30 <loop+4>
+cpsr           0x600000d3	1610612947
+========================
+end () at example1.s:13
+13	    swi 0x123456
+r0             0x0	0
+r1             0x0	0
+r2             0x0	0
+r3             0x0	0
+r4             0x0	0
+r5             0x0	0
+r6             0x0	0
+r7             0x0	0
+r8             0x0	0
+r9             0x0	0
+r10            0x0	0
+r11            0x0	0
+r12            0x0	0
+sp             0x800	0x800
+lr             0x30	48
+pc             0x34	0x34 <end>
+cpsr           0x600000d3	1610612947
+========================
